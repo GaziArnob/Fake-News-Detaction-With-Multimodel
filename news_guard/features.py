@@ -6,12 +6,11 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-import easyocr
 import numpy as np
 import pandas as pd
 import torch
 from nltk.stem import SnowballStemmer
-from PIL import Image, ImageOps
+from PIL import Image
 from sentence_transformers import SentenceTransformer
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
@@ -30,7 +29,7 @@ SEED = 42
 TEXT_MAX_FEATURES = 5_000
 TEXT_MIN_DOCUMENT_FREQUENCY = 3
 # Multilingual so CISF semantic fusion and similarity_score work on Bengali
-# OCR/caption text too, not just English (see OCR_LANGUAGES below).
+# caption text too, not just English.
 SBERT_MODEL_ID = "paraphrase-multilingual-MiniLM-L12-v2"
 BLIP_MODEL_ID = "Salesforce/blip-image-captioning-base"
 CLIP_MODEL_ID = "openai/clip-vit-base-patch32"
@@ -52,40 +51,6 @@ BENGALI_STOP_WORDS = frozenset({
     "এর", "তার", "তাদের", "আমার", "আমাদের", "এখন", "তখন", "যখন",
 })
 TOKEN_PATTERN = re.compile(r"[a-zA-Z][a-zA-Z']+|[ঀ-৿]+")
-
-# This dataset is Bangladeshi news imagery (BANGLADESH BANK, TAKA, BUET, ...):
-# an English-only reader forces Bengali glyphs into nonsense Latin/digit
-# lookalikes, so both scripts must be loaded together.
-OCR_LANGUAGES = ["bn", "en"]
-OCR_CONFIDENCE_THRESHOLD = 0.35
-OCR_MIN_SIDE_PIXELS = 800
-
-
-def preprocess_for_ocr(image: Image.Image) -> np.ndarray:
-    """Grayscale + autocontrast + upscale small images before OCR detection."""
-    gray = ImageOps.autocontrast(image.convert("L"))
-    width, height = gray.size
-    shortest_side = min(width, height)
-    if 0 < shortest_side < OCR_MIN_SIDE_PIXELS:
-        scale = OCR_MIN_SIDE_PIXELS / shortest_side
-        gray = gray.resize((round(width * scale), round(height * scale)), Image.LANCZOS)
-    return np.asarray(gray)
-
-
-def extract_ocr_text(
-    image: Image.Image,
-    reader: "easyocr.Reader",
-    confidence_threshold: float = OCR_CONFIDENCE_THRESHOLD,
-) -> str:
-    """Run EasyOCR with confidence filtering; low-confidence noise is dropped."""
-    processed = preprocess_for_ocr(image)
-    results = reader.readtext(processed, detail=1, paragraph=False)
-    kept = [
-        text.strip()
-        for _, text, confidence in results
-        if confidence >= confidence_threshold and text.strip()
-    ]
-    return " ".join(kept)
 
 
 def tokenize_and_stem(text: str) -> list[str]:
@@ -226,21 +191,11 @@ class ImageFeatureExtractor:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self._reader = None
         self._blip_processor = None
         self._blip_model = None
         self._clip_processor = None
         self._clip_model = None
         self._embedder = None
-
-    @property
-    def reader(self):
-        if self._reader is None:
-            self._reader = easyocr.Reader(
-                OCR_LANGUAGES,
-                model_storage_directory=str(self.settings.project_root / "models" / "easyocr"),
-            )
-        return self._reader
 
     @property
     def embedder(self) -> SentenceTransformer:
@@ -268,15 +223,20 @@ class ImageFeatureExtractor:
         image_path = Path(image_path)
         with Image.open(image_path) as opened_image:
             image = opened_image.convert("RGB")
-        ocr_text = extract_ocr_text(image, self.reader)
+        # OCR was dropped from this pipeline: on this dataset (photographic
+        # images, not text-embedded screenshots) ocr_only accuracy was ~57%,
+        # near chance, and it never contributed once CLIP was included (see
+        # ablation_summary.csv). ocr_text stays as an empty column so the
+        # rest of prepare_text_columns()/CISF need no special-casing.
+        ocr_text = ""
         blip_processor, blip_model = self.blip
         blip_inputs = blip_processor(images=image, return_tensors="pt").to(self.device)
         with torch.inference_mode():
             generated = blip_model.generate(**blip_inputs, max_new_tokens=40)
         caption = blip_processor.decode(generated[0], skip_special_tokens=True).strip()
-        semantic_text = f"caption: {caption} [SEP] ocr: {ocr_text}"
+        semantic_text = f"caption: {caption}"
         embeddings = self.embedder.encode(
-            [ocr_text or " ", caption or " ", semantic_text],
+            [caption or " ", semantic_text],
             normalize_embeddings=True,
             convert_to_numpy=True,
         )
@@ -292,10 +252,10 @@ class ImageFeatureExtractor:
         }])).iloc[0].to_dict()
         base.update({
             "image_path": str(image_path.resolve()),
-            "similarity_score": float(np.dot(embeddings[0], embeddings[1])),
-            "ocr_length": float(len(ocr_text)),
+            "similarity_score": 0.0,
+            "ocr_length": 0.0,
             "caption_length": float(len(caption)),
-            "semantic_embedding": embeddings[2],
+            "semantic_embedding": embeddings[1],
             "clip_embedding": clip_vector.astype(np.float32),
         })
         return base

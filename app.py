@@ -78,8 +78,6 @@ def render_result(result: dict) -> None:
         st.write("**Extracted claim**")
         st.write(local["claim"] or "No readable claim was extracted; review the image manually.")
         st.caption(f"Caption: {local['caption'] or '—'}")
-        if local["ocr_text"]:
-            st.caption(f"OCR: {local['ocr_text'][:700]}")
 
     st.markdown("<div class='section-label'>Dual-model verification</div>", unsafe_allow_html=True)
     verification = result["dual_verification"]

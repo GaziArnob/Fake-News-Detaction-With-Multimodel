@@ -63,7 +63,7 @@ class ProductionClassifier:
         probabilities = self.artifact["model"].predict_proba(row)[0]
         fake_probability = float(probabilities[1])
         label = "fake" if fake_probability >= 0.5 else "real"
-        claim = extracted["ocr_text"].strip() or extracted["caption"].strip()
+        claim = extracted["caption"].strip()
         return LocalPrediction(
             label=label,
             fake_probability=fake_probability,

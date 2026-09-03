@@ -136,6 +136,14 @@ def train_and_save(
     """Fit on all approved labelled records and save an inference artifact."""
     settings.create_runtime_directories()
     frame, clip_columns = load_base_training_data(settings)
+    # OCR is dropped from this pipeline (see ImageFeatureExtractor.extract):
+    # blank these out so training matches what new images will actually
+    # produce at inference time -- ocr_only added no signal once CLIP was
+    # included (ablation_summary.csv), and this dataset's images carry no
+    # embedded text for OCR to find in the first place.
+    frame["ocr_text"] = ""
+    frame["ocr_length"] = 0.0
+    frame["similarity_score"] = 0.0
     raw_columns = [
         "image_path",
         "label",

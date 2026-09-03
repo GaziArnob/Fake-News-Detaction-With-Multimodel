@@ -1,5 +1,4 @@
 # Existing model pipeline
-easyocr
 transformers
 torch
 sentence-transformers

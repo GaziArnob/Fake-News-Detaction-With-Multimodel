@@ -51,8 +51,10 @@ CONFIGS = {
     "text_only": ("combined", False, False),
     "text_plus_cisf": ("combined", True, False),
     "clip_only": (None, False, True),
+    "clip_plus_cisf": (None, True, True),
     "text_plus_clip": ("combined", False, True),
     "full_text_cisf_clip": ("combined", True, True),
+    "caption_plus_cisf_clip": ("caption", True, True),
 }
 
 
@@ -146,14 +148,17 @@ def run_fold(
     numeric_columns = numeric_columns_for(text_source)
 
     if use_cisf:
-        train_semantic_text = (
-            "caption: " + train_frame["caption"].fillna("").astype(str).str.strip()
-            + " [SEP] ocr: " + train_frame["ocr_text"].fillna("").astype(str).str.strip()
-        )
-        test_semantic_text = (
-            "caption: " + test_frame["caption"].fillna("").astype(str).str.strip()
-            + " [SEP] ocr: " + test_frame["ocr_text"].fillna("").astype(str).str.strip()
-        )
+        def semantic_text_for(frame: pd.DataFrame) -> pd.Series:
+            caption = "caption: " + frame["caption"].fillna("").astype(str).str.strip()
+            if text_source == "caption":
+                # OCR fully excluded: CISF must not see it either, or this
+                # isn't really an OCR-free configuration.
+                return caption
+            ocr = " [SEP] ocr: " + frame["ocr_text"].fillna("").astype(str).str.strip()
+            return caption + ocr
+
+        train_semantic_text = semantic_text_for(train_frame)
+        test_semantic_text = semantic_text_for(test_frame)
         train_semantic = embedder.encode(train_semantic_text.tolist(), normalize_embeddings=True, convert_to_numpy=True)
         test_semantic = embedder.encode(test_semantic_text.tolist(), normalize_embeddings=True, convert_to_numpy=True)
         fusion, train_components, train_mean, train_max = SemanticFusionReference.fit(train_semantic)
