@@ -1,0 +1,30 @@
+E:\Project\Fake News Detection\news_guard\training.py:42: DtypeWarning: Columns (0: clip_005) have mixed types. Specify dtype option on import or set low_memory=False.
+  clip = pd.read_csv(settings.project_root / "clip_visual_features.csv")
+Total usable rows: 2000
+Plan: 5-fold x 2 repeats = 10 fold-fits
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+E:\Project\Fake News Detection\.venv\Lib\site-packages\huggingface_hub\file_download.py:141: UserWarning: `huggingface_hub` cache-system uses symlinks by default to efficiently store duplicated files but your machine does not support them in C:\Users\arnob\.cache\huggingface\hub\models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2. Caching files will still work but in a degraded version that might require more space on your disk. This warning can be disabled by setting the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable. For more details, see https://huggingface.co/docs/huggingface_hub/how-to-cache#limitations.
+To support symlinks on Windows, you either need to activate Developer Mode or to run Python as an administrator. In order to activate developer mode, see this article: https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
+  warnings.warn(message)
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 5784.53it/s]
+Fold  1/10: accuracy=0.9625 f1=0.9622 (36.4s)
+Fold  2/10: accuracy=0.9575 f1=0.9576 (35.0s)
+Fold  3/10: accuracy=0.9425 f1=0.9418 (35.1s)
+Fold  4/10: accuracy=0.9625 f1=0.9624 (36.2s)
+Fold  5/10: accuracy=0.9575 f1=0.9582 (34.0s)
+Fold  6/10: accuracy=0.9600 f1=0.9604 (34.2s)
+Fold  7/10: accuracy=0.9400 f1=0.9397 (33.7s)
+Fold  8/10: accuracy=0.9600 f1=0.9600 (34.1s)
+Fold  9/10: accuracy=0.9675 f1=0.9677 (34.9s)
+Fold 10/10: accuracy=0.9500 f1=0.9505 (33.1s)
+
+Total time: 5.8 min
+
+        metric   mean    std    min    max
+      accuracy 0.9560 0.0090 0.9400 0.9675
+       f1_fake 0.9561 0.0092 0.9397 0.9677
+precision_fake 0.9543 0.0097 0.9412 0.9695
+   recall_fake 0.9580 0.0151 0.9300 0.9750
+
+Saved per-fold metrics -> cross_validation_multimodal_fold_metrics.csv
+Saved summary -> cross_validation_multimodal_summary.csv

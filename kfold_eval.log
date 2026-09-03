@@ -1,0 +1,27 @@
+E:\Project\Fake News Detection\news_guard\training.py:42: DtypeWarning: Columns (0: clip_005) have mixed types. Specify dtype option on import or set low_memory=False.
+  clip = pd.read_csv(settings.project_root / "clip_visual_features.csv")
+Total usable rows: 2000
+Plan: 5-fold x 2 repeats = 10 fold-fits
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 3237.27it/s]
+Fold  1/10: accuracy=0.9700 f1=0.9700 (24.7s)
+Fold  2/10: accuracy=0.9550 f1=0.9554 (24.0s)
+Fold  3/10: accuracy=0.9450 f1=0.9447 (23.5s)
+Fold  4/10: accuracy=0.9600 f1=0.9598 (22.4s)
+Fold  5/10: accuracy=0.9475 f1=0.9484 (21.9s)
+Fold  6/10: accuracy=0.9650 f1=0.9652 (22.0s)
+Fold  7/10: accuracy=0.9425 f1=0.9424 (22.2s)
+Fold  8/10: accuracy=0.9675 f1=0.9671 (22.0s)
+Fold  9/10: accuracy=0.9650 f1=0.9655 (22.5s)
+Fold 10/10: accuracy=0.9575 f1=0.9580 (22.4s)
+
+Total time: 3.8 min
+
+        metric   mean    std    min    max
+      accuracy 0.9575 0.0098 0.9425 0.9700
+       f1_fake 0.9577 0.0098 0.9424 0.9700
+precision_fake 0.9545 0.0140 0.9324 0.9795
+   recall_fake 0.9610 0.0133 0.9400 0.9800
+
+Saved per-fold metrics -> cross_validation_multimodal_fold_metrics.csv
+Saved summary -> cross_validation_multimodal_summary.csv

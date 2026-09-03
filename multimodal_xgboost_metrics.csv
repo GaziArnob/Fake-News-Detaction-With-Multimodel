@@ -1,0 +1,2 @@
+model,accuracy,precision_fake,recall_fake,f1_fake,best_cv_f1_fake,training_rows,test_rows
+Tuned multimodal XGBoost (TF-IDF + numeric + CISF + CLIP),0.9475,0.958974359,0.935,0.946835443,0.955518524,1600,400

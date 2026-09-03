@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.py[cod]
+rag/chroma_store/
+data/uploads/
+data/verified_images/
+data/verified_feedback.csv
+data/verified_features.csv
+independent_test_results.csv
+models/easyocr/

@@ -1,0 +1,104 @@
+E:\Project\Fake News Detection\news_guard\training.py:42: DtypeWarning: Columns (0: clip_005) have mixed types. Specify dtype option on import or set low_memory=False.
+  clip = pd.read_csv(settings.project_root / "clip_visual_features.csv")
+Total usable rows: 2000
+Configs: ['ocr_only', 'caption_only', 'text_only', 'text_plus_cisf', 'clip_only', 'text_plus_clip', 'full_text_cisf_clip']
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 7094.97it/s]
+[ocr_only            ] fold  1/10: accuracy=0.5875 (0.3s)
+[ocr_only            ] fold  2/10: accuracy=0.5600 (0.2s)
+[ocr_only            ] fold  3/10: accuracy=0.5675 (0.2s)
+[ocr_only            ] fold  4/10: accuracy=0.5575 (0.2s)
+[ocr_only            ] fold  5/10: accuracy=0.5925 (0.2s)
+[ocr_only            ] fold  6/10: accuracy=0.5750 (0.2s)
+[ocr_only            ] fold  7/10: accuracy=0.5350 (0.2s)
+[ocr_only            ] fold  8/10: accuracy=0.5725 (0.2s)
+[ocr_only            ] fold  9/10: accuracy=0.5500 (0.2s)
+[ocr_only            ] fold 10/10: accuracy=0.5825 (0.2s)
+-> ocr_only done in 0.0 min
+
+[caption_only        ] fold  1/10: accuracy=0.7450 (0.4s)
+[caption_only        ] fold  2/10: accuracy=0.7600 (0.4s)
+[caption_only        ] fold  3/10: accuracy=0.7225 (0.4s)
+[caption_only        ] fold  4/10: accuracy=0.7475 (0.4s)
+[caption_only        ] fold  5/10: accuracy=0.7500 (0.4s)
+[caption_only        ] fold  6/10: accuracy=0.7350 (0.4s)
+[caption_only        ] fold  7/10: accuracy=0.7200 (0.4s)
+[caption_only        ] fold  8/10: accuracy=0.7675 (0.4s)
+[caption_only        ] fold  9/10: accuracy=0.7250 (0.5s)
+[caption_only        ] fold 10/10: accuracy=0.7675 (0.4s)
+-> caption_only done in 0.1 min
+
+[text_only           ] fold  1/10: accuracy=0.7925 (0.6s)
+[text_only           ] fold  2/10: accuracy=0.7700 (0.6s)
+[text_only           ] fold  3/10: accuracy=0.7450 (0.6s)
+[text_only           ] fold  4/10: accuracy=0.7825 (0.6s)
+[text_only           ] fold  5/10: accuracy=0.7525 (0.6s)
+[text_only           ] fold  6/10: accuracy=0.7700 (0.6s)
+[text_only           ] fold  7/10: accuracy=0.7450 (0.6s)
+[text_only           ] fold  8/10: accuracy=0.7900 (0.6s)
+[text_only           ] fold  9/10: accuracy=0.7350 (0.6s)
+[text_only           ] fold 10/10: accuracy=0.7725 (0.6s)
+-> text_only done in 0.1 min
+
+[text_plus_cisf      ] fold  1/10: accuracy=0.7725 (36.7s)
+[text_plus_cisf      ] fold  2/10: accuracy=0.7750 (34.6s)
+[text_plus_cisf      ] fold  3/10: accuracy=0.7550 (34.2s)
+[text_plus_cisf      ] fold  4/10: accuracy=0.7900 (33.9s)
+[text_plus_cisf      ] fold  5/10: accuracy=0.7650 (38.1s)
+[text_plus_cisf      ] fold  6/10: accuracy=0.7900 (35.5s)
+[text_plus_cisf      ] fold  7/10: accuracy=0.7625 (33.6s)
+[text_plus_cisf      ] fold  8/10: accuracy=0.7800 (34.8s)
+[text_plus_cisf      ] fold  9/10: accuracy=0.7950 (34.3s)
+[text_plus_cisf      ] fold 10/10: accuracy=0.7625 (41.8s)
+-> text_plus_cisf done in 6.0 min
+
+[clip_only           ] fold  1/10: accuracy=0.9625 (0.8s)
+[clip_only           ] fold  2/10: accuracy=0.9500 (0.8s)
+[clip_only           ] fold  3/10: accuracy=0.9450 (1.0s)
+[clip_only           ] fold  4/10: accuracy=0.9525 (0.8s)
+[clip_only           ] fold  5/10: accuracy=0.9550 (0.8s)
+[clip_only           ] fold  6/10: accuracy=0.9700 (0.8s)
+[clip_only           ] fold  7/10: accuracy=0.9400 (0.9s)
+[clip_only           ] fold  8/10: accuracy=0.9600 (0.9s)
+[clip_only           ] fold  9/10: accuracy=0.9650 (0.9s)
+[clip_only           ] fold 10/10: accuracy=0.9575 (0.8s)
+-> clip_only done in 0.1 min
+
+[text_plus_clip      ] fold  1/10: accuracy=0.9625 (1.6s)
+[text_plus_clip      ] fold  2/10: accuracy=0.9525 (1.4s)
+[text_plus_clip      ] fold  3/10: accuracy=0.9525 (1.4s)
+[text_plus_clip      ] fold  4/10: accuracy=0.9600 (1.5s)
+[text_plus_clip      ] fold  5/10: accuracy=0.9475 (1.6s)
+[text_plus_clip      ] fold  6/10: accuracy=0.9600 (1.4s)
+[text_plus_clip      ] fold  7/10: accuracy=0.9350 (1.4s)
+[text_plus_clip      ] fold  8/10: accuracy=0.9600 (1.6s)
+[text_plus_clip      ] fold  9/10: accuracy=0.9600 (1.4s)
+[text_plus_clip      ] fold 10/10: accuracy=0.9525 (1.4s)
+-> text_plus_clip done in 0.2 min
+
+[full_text_cisf_clip ] fold  1/10: accuracy=0.9600 (35.9s)
+[full_text_cisf_clip ] fold  2/10: accuracy=0.9525 (36.0s)
+[full_text_cisf_clip ] fold  3/10: accuracy=0.9425 (36.5s)
+[full_text_cisf_clip ] fold  4/10: accuracy=0.9650 (34.4s)
+[full_text_cisf_clip ] fold  5/10: accuracy=0.9575 (34.3s)
+[full_text_cisf_clip ] fold  6/10: accuracy=0.9650 (41.3s)
+[full_text_cisf_clip ] fold  7/10: accuracy=0.9350 (45.9s)
+[full_text_cisf_clip ] fold  8/10: accuracy=0.9625 (33.9s)
+[full_text_cisf_clip ] fold  9/10: accuracy=0.9650 (33.0s)
+[full_text_cisf_clip ] fold 10/10: accuracy=0.9600 (33.1s)
+-> full_text_cisf_clip done in 6.1 min
+
+
+Total time: 12.6 min
+
+             config  accuracy_mean  accuracy_std  f1_fake_mean  f1_fake_std  precision_fake_mean  precision_fake_std  recall_fake_mean  recall_fake_std
+           ocr_only         0.5680        0.0178        0.4294       0.0235               0.6344              0.0392            0.3255           0.0252
+       caption_only         0.7440        0.0179        0.7407       0.0187               0.7505              0.0196            0.7315           0.0245
+          text_only         0.7655        0.0201        0.7648       0.0201               0.7675              0.0235            0.7625           0.0261
+     text_plus_cisf         0.7748        0.0137        0.7750       0.0149               0.7743              0.0186            0.7765           0.0284
+          clip_only         0.9557        0.0092        0.9559       0.0095               0.9512              0.0112            0.9610           0.0181
+     text_plus_clip         0.9543        0.0083        0.9544       0.0083               0.9516              0.0157            0.9575           0.0144
+full_text_cisf_clip         0.9565        0.0103        0.9565       0.0107               0.9548              0.0102            0.9585           0.0190
+
+Saved per-fold metrics -> ablation_fold_metrics.csv
+Saved summary -> ablation_summary.csv

@@ -1,0 +1,3 @@
+image_path,label
+E:\\Independent Test Images\\real\\example_real.jpg,real
+E:\\Independent Test Images\\fake\\example_fake.jpg,fake

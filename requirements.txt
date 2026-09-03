@@ -1,0 +1,21 @@
+# Existing model pipeline
+easyocr
+transformers
+torch
+sentence-transformers
+scikit-learn
+pandas
+pillow
+huggingface_hub
+matplotlib
+nltk
+xgboost
+
+# Verification application
+streamlit
+chromadb
+google-genai
+groq
+python-dotenv
+requests
+joblib

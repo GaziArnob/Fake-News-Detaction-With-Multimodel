@@ -1,0 +1,14 @@
+Rows available: 2,000
+Train / test rows: 1,600 / 400
+Count Vectorizer shape: (1600, 1088)
+TF-IDF shape: (1600, 1088)
+Fitting 3 folds for each of 8 candidates, totalling 24 fits
+Best 3-fold CV F1 (fake): 0.9555
+Best parameters: {'xgb__colsample_bytree': np.float64(0.6834834444556088), 'xgb__gamma': np.float64(0.14286681792194078), 'xgb__learning_rate': np.float64(0.07423304665511389), 'xgb__max_depth': 3, 'xgb__min_child_weight': 2, 'xgb__n_estimators': 443, 'xgb__reg_alpha': np.float64(1.007198483880919e-05), 'xgb__reg_lambda': np.float64(4.9111315080437645), 'xgb__subsample': np.float64(0.8661185283697008)}
+                                                    model  accuracy  precision_fake  recall_fake  f1_fake  best_cv_f1_fake  training_rows  test_rows
+Tuned multimodal XGBoost (TF-IDF + numeric + CISF + CLIP)    0.9475          0.9590       0.9350   0.9468           0.9555           1600        400
+
+Metrics saved to: E:\Project\Fake News Detection\multimodal_xgboost_metrics.csv
+Tuning results saved to: E:\Project\Fake News Detection\multimodal_xgboost_tuning.csv
+Feature importance saved to: E:\Project\Fake News Detection\multimodal_xgboost_feature_importance.csv
+Held-out test data saved to: E:\Project\Fake News Detection\multimodal_heldout_test_set.csv

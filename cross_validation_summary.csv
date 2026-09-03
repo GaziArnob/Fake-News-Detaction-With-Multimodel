@@ -1,0 +1,3 @@
+model,accuracy_mean,accuracy_std,precision_fake_mean,precision_fake_std,recall_fake_mean,recall_fake_std,f1_fake_mean,f1_fake_std
+XGBoost - TF-IDF + numeric,0.7895,0.013509256,0.790598127,0.015919813,0.788,0.022803509,0.789116435,0.014295182
+Linear SVM - TF-IDF,0.763,0.019557607,0.75313292,0.021681449,0.783,0.020796634,0.767667512,0.01859035

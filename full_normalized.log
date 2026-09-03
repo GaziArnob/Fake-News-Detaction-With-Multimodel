@@ -1,0 +1,19 @@
+Rows: 2000
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 2489.55it/s]
+Fold  1/10: accuracy=0.9575 (24.6s)
+Fold  2/10: accuracy=0.9600 (22.3s)
+Fold  3/10: accuracy=0.9475 (21.3s)
+Fold  4/10: accuracy=0.9500 (23.1s)
+Fold  5/10: accuracy=0.9525 (22.3s)
+Fold  6/10: accuracy=0.9475 (22.0s)
+Fold  7/10: accuracy=0.9525 (23.3s)
+Fold  8/10: accuracy=0.9500 (22.6s)
+Fold  9/10: accuracy=0.9550 (21.3s)
+Fold 10/10: accuracy=0.9450 (22.6s)
+
+Total time: 3.8 min
+
+Full pipeline (normalized CLIP) accuracy: 0.9517 +/- 0.0047
+(original full pipeline on un-normalized images was 0.9560 +/- 0.0070)
+Saved -> full_normalized_fold_metrics.csv

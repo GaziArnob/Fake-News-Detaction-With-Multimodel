@@ -1,0 +1,1193 @@
+feature,gain_importance
+tfidf__caption men,0.05900108
+tfidf__alaaz,0.04639504
+tfidf__men,0.04584548
+clip_pca__pca1,0.04182133
+tfidf__lelta,0.03541403
+tabular__token_count,0.032209214
+clip_pca__pca3,0.031505886
+clip_pca__pca4,0.028757075
+clip_pca__pca2,0.028508293
+tfidf__suit,0.02750857
+tabular__cisf_fused_pca_00,0.023578016
+tfidf__white,0.019466061
+clip_pca__pca0,0.018444654
+tfidf__caption man,0.018300243
+tfidf__hold,0.016921226
+tfidf__tabl,0.015375868
+clip_pca__pca22,0.01438495
+clip_pca__pca8,0.013762133
+clip_pca__pca6,0.012935865
+tfidf__sit tabl,0.012768497
+clip_pca__pca25,0.012137911
+tfidf__build,0.011935031
+tfidf__man woman,0.01165141
+clip_pca__pca7,0.011368861
+tfidf__stand,0.010127176
+tabular__similarity_score,0.009687722
+tfidf__group,0.009513289
+clip_pca__pca5,0.009319698
+tabular__caption_length,0.008023961
+tabular__cisf_fused_pca_11,0.007807797
+clip_pca__pca31,0.007777522
+clip_pca__pca27,0.007304975
+tfidf__man,0.007204427
+tabular__cisf_fused_pca_04,0.007030143
+tabular__cisf_fused_pca_18,0.00689543
+tabular__cisf_fused_pca_01,0.006727655
+clip_pca__pca19,0.006718955
+tfidf__sit,0.006703176
+clip_pca__pca9,0.006576452
+clip_pca__pca55,0.006555807
+clip_pca__pca13,0.006473101
+tabular__cisf_fused_pca_15,0.006295524
+tabular__cisf_fused_pca_06,0.006289145
+tabular__cisf_fused_pca_09,0.00626601
+clip_pca__pca51,0.006215083
+clip_pca__pca28,0.006195944
+clip_pca__pca11,0.005820671
+clip_pca__pca46,0.005722314
+tabular__cisf_fused_pca_19,0.00571205
+tabular__cisf_neighbour_max_similarity,0.005585002
+tabular__cisf_fused_pca_17,0.005578709
+clip_pca__pca54,0.005530173
+tfidf__caption group,0.005470986
+clip_pca__pca10,0.005383225
+clip_pca__pca38,0.005310735
+tabular__cisf_fused_pca_24,0.005188123
+clip_pca__pca20,0.005038593
+clip_pca__pca12,0.004925651
+clip_pca__pca52,0.004804088
+clip_pca__pca61,0.004775779
+tabular__cisf_fused_pca_31,0.004587085
+clip_pca__pca32,0.00458698
+clip_pca__pca23,0.004547463
+tabular__ocr_length,0.004414688
+clip_pca__pca58,0.004305809
+clip_pca__pca49,0.004281679
+tabular__cisf_fused_pca_12,0.004241488
+tabular__cisf_fused_pca_28,0.004197445
+clip_pca__pca63,0.004194452
+tabular__cisf_fused_pca_16,0.00417077
+clip_pca__pca47,0.004119967
+clip_pca__pca21,0.004069316
+clip_pca__pca15,0.003943702
+clip_pca__pca33,0.003929856
+tabular__cisf_fused_pca_29,0.003928958
+clip_pca__pca56,0.003918253
+clip_pca__pca14,0.003888626
+tabular__cisf_neighbour_mean_similarity,0.003793754
+tabular__cisf_fused_pca_30,0.003775163
+tabular__cisf_fused_pca_14,0.003753549
+clip_pca__pca57,0.003678057
+clip_pca__pca59,0.003626447
+clip_pca__pca41,0.003555798
+clip_pca__pca36,0.003490573
+clip_pca__pca30,0.003383167
+tabular__cisf_fused_pca_26,0.003218843
+clip_pca__pca60,0.003081723
+tabular__cisf_fused_pca_08,0.003001686
+clip_pca__pca62,0.002996602
+clip_pca__pca35,0.002860929
+clip_pca__pca29,0.002847177
+clip_pca__pca50,0.002832504
+clip_pca__pca40,0.00268448
+tabular__cisf_fused_pca_20,0.002590717
+tabular__cisf_fused_pca_21,0.002584496
+tfidf__caption,0.002581528
+clip_pca__pca16,0.002545628
+clip_pca__pca34,0.002426909
+tabular__cisf_fused_pca_22,0.002414036
+clip_pca__pca48,0.002372507
+clip_pca__pca53,0.00230168
+clip_pca__pca42,0.001849695
+clip_pca__pca45,0.001842633
+clip_pca__pca37,0.001813188
+tabular__cisf_fused_pca_25,0.001794009
+tabular__cisf_fused_pca_27,0.001772984
+clip_pca__pca43,0.001768476
+tabular__cisf_fused_pca_02,0.001663979
+clip_pca__pca26,0.00164446
+clip_pca__pca39,0.001626023
+tabular__cisf_fused_pca_05,0.001605998
+clip_pca__pca18,0.001579843
+tabular__cisf_fused_pca_10,0.001564208
+clip_pca__pca44,0.00155136
+clip_pca__pca17,0.001548215
+tabular__cisf_fused_pca_03,0.001250238
+tabular__has_ocr_text,0.001203795
+tabular__cisf_fused_pca_13,0.00112054
+tabular__cisf_fused_pca_23,0.001077195
+tabular__cisf_fused_pca_07,0.000925974
+clip_pca__pca24,0.000520787
+tfidf__btcl,0
+tfidf__build ocr,0
+tfidf__bull,0
+tfidf__bunch,0
+tfidf__bus,0
+tfidf__busi,0
+tfidf__camera,0
+tfidf__camera ocr,0
+tfidf__candid,0
+tfidf__cann,0
+tfidf__cap,0
+tfidf__caption anusha,0
+tfidf__caption astronaut,0
+tfidf__caption bang,0
+tfidf__caption bangladesh,0
+tfidf__caption bjp,0
+tfidf__caption boy,0
+tfidf__caption build,0
+tfidf__caption bunch,0
+tfidf__caption bus,0
+tfidf__caption cast,0
+tfidf__caption citi,0
+tfidf__caption congress,0
+tfidf__caption coupl,0
+tfidf__caption crowd,0
+tfidf__caption entranc,0
+tfidf__caption famili,0
+tfidf__caption flag,0
+tfidf__caption girl,0
+tfidf__caption gold,0
+tfidf__caption googl,0
+tfidf__caption hand,0
+tfidf__caption indian,0
+tfidf__caption larg,0
+tfidf__caption logo,0
+tfidf__caption meet,0
+tfidf__caption minist,0
+tfidf__caption new,0
+tfidf__caption pakistan,0
+tfidf__caption peopl,0
+tfidf__caption person,0
+tfidf__caption pictur,0
+tfidf__caption pile,0
+tfidf__caption polic,0
+tfidf__caption poster,0
+tfidf__caption presid,0
+tfidf__caption prime,0
+tfidf__caption ran,0
+tfidf__caption road,0
+tfidf__caption sign,0
+tfidf__caption soccer,0
+tfidf__caption student,0
+tfidf__caption team,0
+tfidf__caption train,0
+tfidf__caption trump,0
+tfidf__caption video,0
+tfidf__caption white,0
+tfidf__caption woman,0
+tfidf__caption women,0
+tfidf__caption wooden,0
+tfidf__caption yellow,0
+tfidf__caption young,0
+tfidf__car,0
+tfidf__car ocr,0
+tfidf__card,0
+tfidf__carpet,0
+tfidf__carpet ocr,0
+tfidf__carri,0
+tfidf__cast,0
+tfidf__cat,0
+tfidf__ce,0
+tfidf__celebr,0
+tfidf__celebr goal,0
+tfidf__cell,0
+tfidf__cell ocr,0
+tfidf__cell phone,0
+tfidf__center,0
+tfidf__ceremoni,0
+tfidf__certif,0
+tfidf__certif ocr,0
+tfidf__cf,0
+tfidf__chair,0
+tfidf__chair ocr,0
+tfidf__chair talk,0
+tfidf__chatgpt,0
+tfidf__chef,0
+tfidf__chicken,0
+tfidf__chief,0
+tfidf__child,0
+tfidf__children,0
+tfidf__children sit,0
+tfidf__china,0
+tfidf__ci,0
+tfidf__citi,0
+tfidf__citi corpor,0
+tfidf__citi ocr,0
+tfidf__citi street,0
+tfidf__citizen,0
+tfidf__cl,0
+tfidf__classroom,0
+tfidf__classroom ocr,0
+tfidf__close,0
+tfidf__cloth,0
+tfidf__club,0
+tfidf__coat,0
+tfidf__col,0
+tfidf__color,0
+tfidf__commiss,0
+tfidf__compani,0
+tfidf__compani ocr,0
+tfidf__composit,0
+tfidf__composit imag,0
+tfidf__comput,0
+tfidf__comput ocr,0
+tfidf__cone,0
+tfidf__confer,0
+tfidf__congress,0
+tfidf__congress parti,0
+tfidf__construct,0
+tfidf__construct site,0
+tfidf__contain,0
+tfidf__contest,0
+tfidf__corpor,0
+tfidf__couch,0
+tfidf__couch ocr,0
+tfidf__coupl,0
+tfidf__coupl peopl,0
+tfidf__court,0
+tfidf__courtroom,0
+tfidf__courtroom ocr,0
+tfidf__cover,0
+tfidf__cow,0
+tfidf__cow ocr,0
+tfidf__cr,0
+tfidf__credit,0
+tfidf__cricket,0
+tfidf__cricket ocr,0
+tfidf__cricket team,0
+tfidf__cross,0
+tfidf__crowd,0
+tfidf__crowd ocr,0
+tfidf__crowd peopl,0
+tfidf__ct,0
+tfidf__cti,0
+tfidf__ctt,0
+tfidf__cup,0
+tfidf__cup ocr,0
+tfidf__currenc,0
+tfidf__da,0
+tfidf__dan,0
+tfidf__dark,0
+tfidf__day,0
+tfidf__day day,0
+tfidf__day ocr,0
+tfidf__day wnoilir,0
+tfidf__dda,0
+tfidf__dda su,0
+tfidf__delhi,0
+tfidf__delhi ocr,0
+tfidf__depart,0
+tfidf__desk,0
+tfidf__desk classroom,0
+tfidf__desk comput,0
+tfidf__desk ocr,0
+tfidf__develop,0
+tfidf__df,0
+tfidf__dhaka,0
+tfidf__dhaka ocr,0
+tfidf__di,0
+tfidf__dj,0
+tfidf__dlgda,0
+tfidf__dlgda alaaz,0
+tfidf__doctor,0
+tfidf__document,0
+tfidf__document ocr,0
+tfidf__dog,0
+tfidf__dog ocr,0
+tfidf__dr,0
+tfidf__dress,0
+tfidf__dress ocr,0
+tfidf__dress stand,0
+tfidf__drink,0
+tfidf__dt,0
+tfidf__ea,0
+tfidf__eat,0
+tfidf__ec,0
+tfidf__educ,0
+tfidf__ee,0
+tfidf__ef,0
+tfidf__el,0
+tfidf__ela,0
+tfidf__elect,0
+tfidf__em,0
+tfidf__emerg,0
+tfidf__emerg depart,0
+tfidf__en,0
+tfidf__entranc,0
+tfidf__er,0
+tfidf__ert,0
+tfidf__es,0
+tfidf__et,0
+tfidf__event,0
+tfidf__event ocr,0
+tfidf__exam,0
+tfidf__examin,0
+tfidf__exchang,0
+tfidf__fa,0
+tfidf__face,0
+tfidf__facebook,0
+tfidf__famili,0
+tfidf__fat,0
+tfidf__fc,0
+tfidf__festiv,0
+tfidf__fet,0
+tfidf__ff,0
+tfidf__fi,0
+tfidf__field,0
+tfidf__field ocr,0
+tfidf__fifa,0
+tfidf__fill,0
+tfidf__film,0
+tfidf__financ,0
+tfidf__finger,0
+tfidf__flag,0
+tfidf__flag background,0
+tfidf__flag ocr,0
+tfidf__fli,0
+tfidf__flood,0
+tfidf__floor,0
+tfidf__floor room,0
+tfidf__flower,0
+tfidf__flower ocr,0
+tfidf__fo,0
+tfidf__food,0
+tfidf__food ocr,0
+tfidf__footbal,0
+tfidf__forest,0
+tfidf__forest ocr,0
+tfidf__fr,0
+tfidf__fs,0
+tfidf__ft,0
+tfidf__fv,0
+tfidf__fz,0
+tfidf__ga,0
+tfidf__game,0
+tfidf__game cricket,0
+tfidf__gas,0
+tfidf__gather,0
+tfidf__ge,0
+tfidf__gf,0
+tfidf__gi,0
+tfidf__gia,0
+tfidf__girl,0
+tfidf__girl sit,0
+tfidf__give,0
+tfidf__give speech,0
+tfidf__gl,0
+tfidf__gla,0
+tfidf__glass,0
+tfidf__glass ocr,0
+tfidf__glass speak,0
+tfidf__global,0
+tfidf__glove,0
+tfidf__gm,0
+tfidf__goal,0
+tfidf__gold,0
+tfidf__gold bar,0
+tfidf__gold jewelleri,0
+tfidf__gold necklac,0
+tfidf__gold ocr,0
+tfidf__gold price,0
+tfidf__googl,0
+tfidf__govern,0
+tfidf__gr,0
+tfidf__great,0
+tfidf__green,0
+tfidf__green sari,0
+tfidf__green shirt,0
+tfidf__green uniform,0
+tfidf__ground,0
+tfidf__group doctor,0
+tfidf__group men,0
+tfidf__group peopl,0
+tfidf__group young,0
+tfidf__gt,0
+tfidf__gu,0
+tfidf__ha,0
+tfidf__hair,0
+tfidf__hallway,0
+tfidf__hallway ocr,0
+tfidf__hand,0
+tfidf__hand flag,0
+tfidf__hand hold,0
+tfidf__hand ocr,0
+tfidf__hang,0
+tfidf__hard,0
+tfidf__hard hat,0
+tfidf__hat,0
+tfidf__hat ocr,0
+tfidf__hat stand,0
+tfidf__head,0
+tfidf__head hand,0
+tfidf__health,0
+tfidf__held,0
+tfidf__helmet,0
+tfidf__hi,0
+tfidf__hina,0
+tfidf__hindi,0
+tfidf__hindi ocr,0
+tfidf__hn,0
+tfidf__hold babi,0
+tfidf__hold banner,0
+tfidf__hold bat,0
+tfidf__hold cell,0
+tfidf__hold certif,0
+tfidf__hold document,0
+tfidf__hold flag,0
+tfidf__hold gold,0
+tfidf__hold hand,0
+tfidf__hold microphon,0
+tfidf__hold paper,0
+tfidf__hold phone,0
+tfidf__hold sign,0
+tfidf__hold trophi,0
+tfidf__hoodi,0
+tfidf__hospit,0
+tfidf__hospit bed,0
+tfidf__hospit ocr,0
+tfidf__hospit room,0
+tfidf__hous,0
+tfidf__ia,0
+tfidf__ic,0
+tfidf__id,0
+tfidf__ifa,0
+tfidf__ifa lf,0
+tfidf__ig,0
+tfidf__ii,0
+tfidf__il,0
+tfidf__imag,0
+tfidf__imag ocr,0
+tfidf__india,0
+tfidf__india ocr,0
+tfidf__india shrian,0
+tfidf__indian,0
+tfidf__io,0
+tfidf__iphon,0
+tfidf__ir,0
+tfidf__iran,0
+tfidf__islam,0
+tfidf__ita,0
+tfidf__ja,0
+tfidf__jacket,0
+tfidf__jacket hat,0
+tfidf__jacket ocr,0
+tfidf__jacket stand,0
+tfidf__jet,0
+tfidf__jet fli,0
+tfidf__jewelleri,0
+tfidf__jewelleri india,0
+tfidf__jf,0
+tfidf__ji,0
+tfidf__jl,0
+tfidf__jo,0
+tfidf__jt,0
+tfidf__judg,0
+tfidf__khali,0
+tfidf__khan,0
+tfidf__la,0
+tfidf__lab,0
+tfidf__lab coat,0
+tfidf__lab ocr,0
+tfidf__laptop,0
+tfidf__laptop ocr,0
+tfidf__larg,0
+tfidf__larg screen,0
+tfidf__larg ship,0
+tfidf__launch,0
+tfidf__lay,0
+tfidf__le,0
+tfidf__leader,0
+tfidf__lelta sprallgka,0
+tfidf__lf,0
+tfidf__lf ttrt,0
+tfidf__librari,0
+tfidf__limit,0
+tfidf__line,0
+tfidf__line ocr,0
+tfidf__live,0
+tfidf__ll,0
+tfidf__lo,0
+tfidf__logo,0
+tfidf__logo bangladesh,0
+tfidf__logo ocr,0
+tfidf__long,0
+tfidf__long hair,0
+tfidf__look,0
+tfidf__look camera,0
+tfidf__look laptop,0
+tfidf__look ocr,0
+tfidf__lot,0
+tfidf__lucknow,0
+tfidf__ma,0
+tfidf__machin,0
+tfidf__machin ocr,0
+tfidf__maharashtra,0
+tfidf__make,0
+tfidf__man beard,0
+tfidf__man black,0
+tfidf__man blue,0
+tfidf__man carri,0
+tfidf__man glass,0
+tfidf__man green,0
+tfidf__man hold,0
+tfidf__man lay,0
+tfidf__man look,0
+tfidf__man militari,0
+tfidf__man mustach,0
+tfidf__man ocr,0
+tfidf__man red,0
+tfidf__man ride,0
+tfidf__man sit,0
+tfidf__man speak,0
+tfidf__man stand,0
+tfidf__man suit,0
+tfidf__man walk,0
+tfidf__man wear,0
+tfidf__man white,0
+tfidf__map,0
+tfidf__market,0
+tfidf__market ocr,0
+tfidf__mask,0
+tfidf__mask hold,0
+tfidf__mask ocr,0
+tfidf__mask sit,0
+tfidf__mask stand,0
+tfidf__match,0
+tfidf__match ocr,0
+tfidf__mdad,0
+tfidf__mdad dda,0
+tfidf__media,0
+tfidf__media ocr,0
+tfidf__meet,0
+tfidf__meet held,0
+tfidf__meet room,0
+tfidf__men green,0
+tfidf__men hold,0
+tfidf__men ocr,0
+tfidf__men play,0
+tfidf__men shake,0
+tfidf__men sit,0
+tfidf__men stand,0
+tfidf__men suit,0
+tfidf__men white,0
+tfidf__microphon,0
+tfidf__microphon crowd,0
+tfidf__microphon ocr,0
+tfidf__middl,0
+tfidf__middl street,0
+tfidf__militari,0
+tfidf__militari uniform,0
+tfidf__minist,0
+tfidf__minist state,0
+tfidf__ministri,0
+tfidf__ml,0
+tfidf__mm,0
+tfidf__mn,0
+tfidf__mo,0
+tfidf__model,0
+tfidf__mohammad,0
+tfidf__money,0
+tfidf__moon,0
+tfidf__moon ocr,0
+tfidf__motorcycl,0
+tfidf__movi,0
+tfidf__mr,0
+tfidf__ms,0
+tfidf__mt,0
+tfidf__mukherje,0
+tfidf__mumbai,0
+tfidf__mumbai ocr,0
+tfidf__mustach,0
+tfidf__na,0
+tfidf__nation,0
+tfidf__nation bank,0
+tfidf__ncp,0
+tfidf__nd,0
+tfidf__nd test,0
+tfidf__ne,0
+tfidf__necklac,0
+tfidf__net,0
+tfidf__new,0
+tfidf__new delhi,0
+tfidf__news,0
+tfidf__newspap,0
+tfidf__newspap ocr,0
+tfidf__night,0
+tfidf__night ocr,0
+tfidf__no,0
+tfidf__note,0
+tfidf__nt,0
+tfidf__oa,0
+tfidf__ocean,0
+tfidf__ocean ocr,0
+tfidf__ocr,0
+tfidf__ocr ad,0
+tfidf__ocr aia,0
+tfidf__ocr aj,0
+tfidf__ocr ajda,0
+tfidf__ocr bangladesh,0
+tfidf__ocr btcl,0
+tfidf__ocr cat,0
+tfidf__ocr dhaka,0
+tfidf__ocr io,0
+tfidf__ocr lelta,0
+tfidf__ocr mdad,0
+tfidf__ocr ollla,0
+tfidf__ocr oo,0
+tfidf__ocr polic,0
+tfidf__ocr ta,0
+tfidf__ocr unicef,0
+tfidf__ocr world,0
+tfidf__od,0
+tfidf__offic,0
+tfidf__offic ocr,0
+tfidf__oil,0
+tfidf__ollla,0
+tfidf__ollla si,0
+tfidf__om,0
+tfidf__oo,0
+tfidf__orang,0
+tfidf__organ,0
+tfidf__organ ocr,0
+tfidf__ot,0
+tfidf__outfit,0
+tfidf__outsid,0
+tfidf__paint,0
+tfidf__pair,0
+tfidf__pakistan,0
+tfidf__paper,0
+tfidf__paper ocr,0
+tfidf__park,0
+tfidf__parliament,0
+tfidf__parti,0
+tfidf__parti leader,0
+tfidf__past,0
+tfidf__pay,0
+tfidf__pc,0
+tfidf__pen,0
+tfidf__pen ocr,0
+tfidf__peopl,0
+tfidf__peopl gather,0
+tfidf__peopl hold,0
+tfidf__peopl ocr,0
+tfidf__peopl ride,0
+tfidf__peopl sit,0
+tfidf__peopl stand,0
+tfidf__peopl walk,0
+tfidf__peopl wear,0
+tfidf__person,0
+tfidf__person hand,0
+tfidf__person hold,0
+tfidf__person person,0
+tfidf__petrol,0
+tfidf__phone,0
+tfidf__phone ocr,0
+tfidf__photo,0
+tfidf__photo ocr,0
+tfidf__pi,0
+tfidf__pictur,0
+tfidf__pictur man,0
+tfidf__pictur ocr,0
+tfidf__piec,0
+tfidf__pile,0
+tfidf__pile money,0
+tfidf__pillow,0
+tfidf__pink,0
+tfidf__plant,0
+tfidf__plant ocr,0
+tfidf__plate,0
+tfidf__plate food,0
+tfidf__platform,0
+tfidf__platform ocr,0
+tfidf__play,0
+tfidf__play game,0
+tfidf__player,0
+tfidf__player celebr,0
+tfidf__plc,0
+tfidf__podium,0
+tfidf__podium crowd,0
+tfidf__podium flag,0
+tfidf__podium microphon,0
+tfidf__podium ocr,0
+tfidf__point,0
+tfidf__polic,0
+tfidf__polic offic,0
+tfidf__polic polic,0
+tfidf__polic uniform,0
+tfidf__poll,0
+tfidf__pose,0
+tfidf__pose photo,0
+tfidf__pose pictur,0
+tfidf__post,0
+tfidf__poster,0
+tfidf__poster ocr,0
+tfidf__power,0
+tfidf__premier,0
+tfidf__prepar,0
+tfidf__presid,0
+tfidf__press,0
+tfidf__press confer,0
+tfidf__price,0
+tfidf__price india,0
+tfidf__prime,0
+tfidf__prime india,0
+tfidf__prime pakistan,0
+tfidf__protest,0
+tfidf__put,0
+tfidf__ra,0
+tfidf__rai,0
+tfidf__rain,0
+tfidf__ralli,0
+tfidf__ran,0
+tfidf__rc,0
+tfidf__rd,0
+tfidf__red,0
+tfidf__red background,0
+tfidf__red carpet,0
+tfidf__red dress,0
+tfidf__red sari,0
+tfidf__red shirt,0
+tfidf__report,0
+tfidf__report ocr,0
+tfidf__ri,0
+tfidf__rice,0
+tfidf__rick,0
+tfidf__ride,0
+tfidf__ride motorcycl,0
+tfidf__ride rick,0
+tfidf__rig,0
+tfidf__rise,0
+tfidf__river,0
+tfidf__rl,0
+tfidf__rn,0
+tfidf__ro,0
+tfidf__road,0
+tfidf__road ocr,0
+tfidf__robe,0
+tfidf__roll,0
+tfidf__room,0
+tfidf__room ocr,0
+tfidf__rot,0
+tfidf__row,0
+tfidf__rr,0
+tfidf__rri,0
+tfidf__rs,0
+tfidf__rt,0
+tfidf__rta,0
+tfidf__ru,0
+tfidf__run,0
+tfidf__sa,0
+tfidf__safeti,0
+tfidf__salad,0
+tfidf__sar,0
+tfidf__sar ocr,0
+tfidf__sari,0
+tfidf__sari ocr,0
+tfidf__sari sar,0
+tfidf__sari sari,0
+tfidf__say,0
+tfidf__say no,0
+tfidf__scarf,0
+tfidf__scarf hold,0
+tfidf__scarf ocr,0
+tfidf__school,0
+tfidf__school ocr,0
+tfidf__school uniform,0
+tfidf__scienc,0
+tfidf__screen,0
+tfidf__screen ocr,0
+tfidf__scrub,0
+tfidf__scrub mask,0
+tfidf__seen,0
+tfidf__sen,0
+tfidf__servic,0
+tfidf__shah,0
+tfidf__shake,0
+tfidf__shake hand,0
+tfidf__sheikh,0
+tfidf__sheikh ocr,0
+tfidf__sheikh sheikh,0
+tfidf__ship,0
+tfidf__ship ocean,0
+tfidf__shirt,0
+tfidf__shirt black,0
+tfidf__shirt glass,0
+tfidf__shirt hold,0
+tfidf__shirt ocr,0
+tfidf__shirt red,0
+tfidf__shirt stand,0
+tfidf__shirt sunglass,0
+tfidf__shop,0
+tfidf__shown,0
+tfidf__shrian,0
+tfidf__shrian singh,0
+tfidf__si,0
+tfidf__si dlgda,0
+tfidf__sign,0
+tfidf__sign crowd,0
+tfidf__sign ocr,0
+tfidf__sign say,0
+tfidf__sing,0
+tfidf__sing microphon,0
+tfidf__singh,0
+tfidf__singh ocr,0
+tfidf__singh singh,0
+tfidf__ala,0
+tfidf__sit bench,0
+tfidf__sit chair,0
+tfidf__sit couch,0
+tfidf__sit desk,0
+tfidf__sit floor,0
+tfidf__sit ground,0
+tfidf__sit hospit,0
+tfidf__sit room,0
+tfidf__af,0
+tfidf__site,0
+tfidf__site ocr,0
+tfidf__sky,0
+tfidf__sky ocr,0
+tfidf__sleep,0
+tfidf__small,0
+tfidf__smile,0
+tfidf__smoke,0
+tfidf__soccer,0
+tfidf__soccer field,0
+tfidf__soccer player,0
+tfidf__soldier,0
+tfidf__sp,0
+tfidf__speak,0
+tfidf__speak media,0
+tfidf__speak microphon,0
+tfidf__speak podium,0
+tfidf__speech,0
+tfidf__speech ocr,0
+tfidf__sport,0
+tfidf__sprallgka,0
+tfidf__sprallgka aa,0
+tfidf__sprallgka alaaz,0
+tfidf__sr,0
+tfidf__ss,0
+tfidf__ssc,0
+tfidf__st,0
+tfidf__stack,0
+tfidf__stadium,0
+tfidf__stadium ocr,0
+tfidf__stage,0
+tfidf__stage ocr,0
+tfidf__aa,0
+tfidf__stand bank,0
+tfidf__stand banner,0
+tfidf__stand blue,0
+tfidf__stand bridg,0
+tfidf__stand build,0
+tfidf__stand citi,0
+tfidf__stand construct,0
+tfidf__stand crowd,0
+tfidf__stand field,0
+tfidf__stand larg,0
+tfidf__stand line,0
+tfidf__stand man,0
+tfidf__stand market,0
+tfidf__stand men,0
+tfidf__stand microphon,0
+tfidf__stand outsid,0
+tfidf__stand peopl,0
+tfidf__stand podium,0
+tfidf__stand red,0
+tfidf__stand road,0
+tfidf__stand room,0
+tfidf__stand screen,0
+tfidf__stand sign,0
+tfidf__stand stadium,0
+tfidf__stand stage,0
+tfidf__stand street,0
+tfidf__stand tabl,0
+tfidf__stand train,0
+tfidf__stand tree,0
+tfidf__stand wall,0
+tfidf__state,0
+tfidf__station,0
+tfidf__station ocr,0
+tfidf__statu,0
+tfidf__store,0
+tfidf__store ocr,0
+tfidf__street,0
+tfidf__street ocr,0
+tfidf__student,0
+tfidf__su,0
+tfidf__ac,0
+tfidf__suit hold,0
+tfidf__suit mask,0
+tfidf__suit ocr,0
+tfidf__suit sit,0
+tfidf__suit speak,0
+tfidf__suit stand,0
+tfidf__suit tie,0
+tfidf__sun,0
+tfidf__sunglass,0
+tfidf__sunglass ocr,0
+tfidf__surgic,0
+tfidf__surgic mask,0
+tfidf__surround,0
+tfidf__ta,0
+tfidf__taa,0
+tfidf__adesh,0
+tfidf__tabl book,0
+tfidf__tabl flag,0
+tfidf__tabl laptop,0
+tfidf__tabl microphon,0
+tfidf__tabl ocr,0
+tfidf__tabl paper,0
+tfidf__take,0
+tfidf__talk,0
+tfidf__talk men,0
+tfidf__talk report,0
+tfidf__tat,0
+tfidf__tc,0
+tfidf__tcl,0
+tfidf__te,0
+tfidf__team,0
+tfidf__televis,0
+tfidf__televis ocr,0
+tfidf__test,0
+tfidf__test day,0
+tfidf__tf,0
+tfidf__th,0
+tfidf__ti,0
+tfidf__tia,0
+tfidf__tie,0
+tfidf__tie give,0
+tfidf__tie hold,0
+tfidf__tie ocr,0
+tfidf__tie sit,0
+tfidf__tie speak,0
+tfidf__tie stand,0
+tfidf__tk,0
+tfidf__tl,0
+tfidf__tm,0
+tfidf__tn,0
+tfidf__tr,0
+tfidf__track,0
+tfidf__track ocr,0
+tfidf__tradit,0
+tfidf__train,0
+tfidf__train station,0
+tfidf__train track,0
+tfidf__tree,0
+tfidf__tree ocr,0
+tfidf__tri,0
+tfidf__trophi,0
+tfidf__trophi ocr,0
+tfidf__trt,0
+tfidf__truck,0
+tfidf__trump,0
+tfidf__tt,0
+tfidf__tta,0
+tfidf__ttrt,0
+tfidf__ttrt tt,0
+tfidf__ttt,0
+tfidf__tu,0
+tfidf__tube,0
+tfidf__tuk,0
+tfidf__tuk ocr,0
+tfidf__tv,0
+tfidf__tv screen,0
+tfidf__ua,0
+tfidf__ue,0
+tfidf__ul,0
+tfidf__unicef,0
+tfidf__uniform,0
+tfidf__uniform hold,0
+tfidf__uniform ocr,0
+tfidf__uniform stand,0
+tfidf__unit,0
+tfidf__univers,0
+tfidf__upcom,0
+tfidf__use,0
+tfidf__vest,0
+tfidf__vice,0
+tfidf__video,0
+tfidf__villag,0
+tfidf__vs,0
+tfidf__vs bangladesh,0
+tfidf__wait,0
+tfidf__walk,0
+tfidf__walk past,0
+tfidf__walk street,0
+tfidf__wall,0
+tfidf__wall ocr,0
+tfidf__warehous,0
+tfidf__water,0
+tfidf__water ocr,0
+tfidf__wave,0
+tfidf__way,0
+tfidf__wear,0
+tfidf__wear black,0
+tfidf__wear mask,0
+tfidf__wear surgic,0
+tfidf__welcom,0
+tfidf__whatsapp,0
+tfidf__whatsawh,0
+tfidf__wheelchair,0
+tfidf__ad,0
+tfidf__white coat,0
+tfidf__white dress,0
+tfidf__white hat,0
+tfidf__white outfit,0
+tfidf__white sari,0
+tfidf__white shirt,0
+tfidf__wi,0
+tfidf__wife,0
+tfidf__win,0
+tfidf__window,0
+tfidf__window ocr,0
+tfidf__wnoilir,0
+tfidf__wnoilir ifa,0
+tfidf__woman,0
+tfidf__woman black,0
+tfidf__woman blue,0
+tfidf__woman green,0
+tfidf__woman hold,0
+tfidf__woman hospit,0
+tfidf__woman long,0
+tfidf__woman look,0
+tfidf__woman pink,0
+tfidf__woman red,0
+tfidf__woman seen,0
+tfidf__woman shake,0
+tfidf__woman sit,0
+tfidf__woman stand,0
+tfidf__woman suit,0
+tfidf__woman walk,0
+tfidf__woman wear,0
+tfidf__woman white,0
+tfidf__woman yellow,0
+tfidf__women,0
+tfidf__women blue,0
+tfidf__women sit,0
+tfidf__women stand,0
+tfidf__women white,0
+tfidf__wooden,0
+tfidf__word,0
+tfidf__word ocr,0
+tfidf__work,0
+tfidf__world,0
+tfidf__world ocr,0
+tfidf__wr,0
+tfidf__write,0
+tfidf__wt,0
+tfidf__xi,0
+tfidf__ye,0
+tfidf__yellow,0
+tfidf__yellow shirt,0
+tfidf__young,0
+tfidf__young boy,0
+tfidf__young girl,0
+tfidf__zi,0
+tfidf__ani,0
+tfidf__anusha,0
+tfidf__anusha mukherje,0
+tfidf__app,0
+tfidf__april,0
+tabular__unique_token_ratio,0
+tfidf__aq,0
+tfidf__ar,0
+tfidf__arm,0
+tfidf__arm ocr,0
+tfidf__armi,0
+tfidf__arriv,0
+tfidf__astronaut,0
+tfidf__astronaut stand,0
+tfidf__ate,0
+tfidf__att,0
+tfidf__au,0
+tfidf__babi,0
+tfidf__babi ocr,0
+tfidf__background,0
+tfidf__background ocr,0
+tfidf__bad,0
+tfidf__bad da,0
+tfidf__bag,0
+tfidf__ball,0
+tfidf__bancladesh,0
+tfidf__band,0
+tfidf__bang,0
+tfidf__bang bang,0
+tfidf__bang ocr,0
+tfidf__bangladesh,0
+tfidf__bangladesh bank,0
+tfidf__bangladesh cricket,0
+tfidf__bangladesh flag,0
+tfidf__bangladesh nation,0
+tfidf__bangladesh ocr,0
+tfidf__bangladesh vs,0
+tfidf__bank,0
+tfidf__bank logo,0
+tfidf__bank note,0
+tfidf__bank ocr,0
+tfidf__banner,0
+tfidf__banner ocr,0
+tfidf__banner street,0
+tfidf__bar,0
+tfidf__bar ocr,0
+tfidf__bat,0
+tfidf__bat ocr,0
+tfidf__beard,0
+tfidf__beard glass,0
+tfidf__beard ocr,0
+tfidf__bed,0
+tfidf__bed ocr,0
+tfidf__bench,0
+tfidf__bench ocr,0
+tfidf__best,0
+tfidf__bharat,0
+tfidf__big,0
+tfidf__bjp,0
+tfidf__bjp candid,0
+tfidf__bjp parti,0
+tfidf__black,0
+tfidf__black dress,0
+tfidf__black jacket,0
+tfidf__black shirt,0
+tfidf__black suit,0
+tfidf__black white,0
+tfidf__blue,0
+tfidf__blue dress,0
+tfidf__blue glove,0
+tfidf__blue jacket,0
+tfidf__blue scarf,0
+tfidf__action,0
+tfidf__afa,0
+tfidf__ahmedabad,0
+tfidf__ahmedabad ocr,0
+tfidf__ai,0
+tfidf__aia,0
+tfidf__aia day,0
+tfidf__aic,0
+tfidf__air,0
+tfidf__air ocr,0
+tfidf__aj,0
+tfidf__aj da,0
+tfidf__aj dda,0
+tfidf__ajda,0
+tfidf__al,0
+tfidf__address,0
+tfidf__ad dda,0
+tfidf__blue scrub,0
+tfidf__blue shirt,0
+tfidf__blue sky,0
+tfidf__board,0
+tfidf__boat,0
+tfidf__boat ocr,0
+tfidf__book,0
+tfidf__book ocr,0
+tfidf__bottl,0
+tfidf__bowl,0
+tfidf__box,0
+tfidf__boy,0
+tfidf__bridg,0
+tfidf__broken,0
+tfidf__ae,0

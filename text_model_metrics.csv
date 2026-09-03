@@ -1,0 +1,4 @@
+model,accuracy,precision_fake,recall_fake,f1_fake
+XGBoost — TF-IDF + numeric,0.7925,0.806282723,0.77,0.787723785
+Linear SVM — TF-IDF,0.7725,0.758293839,0.8,0.778588808
+Linear SVM — Count Vectorizer,0.7525,0.746341463,0.765,0.755555556

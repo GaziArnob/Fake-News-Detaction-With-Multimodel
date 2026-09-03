@@ -1,0 +1,3 @@
+Saved production model: E:\Project\Fake News Detection\models\multimodal_model.joblib
+Training rows: 2000
+Class counts: {'real': 1000, 'fake': 1000}

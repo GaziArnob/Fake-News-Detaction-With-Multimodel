@@ -1,0 +1,31 @@
+Running notebook cell 5
+Using device: cpu
+Base path: E:\Project\Fake News Detection\images
+Running notebook cell 19
+Rows available: 2,000
+Train / test rows: 1,600 / 400
+Count Vectorizer shape: (1600, 1088)
+TF-IDF shape: (1600, 1088)
+Running notebook cell 21
+                        model  accuracy  precision_fake  recall_fake  f1_fake
+   XGBoost — TF-IDF + numeric    0.7925          0.8063       0.7700   0.7877
+          Linear SVM — TF-IDF    0.7725          0.7583       0.8000   0.7786
+Linear SVM — Count Vectorizer    0.7525          0.7463       0.7650   0.7556
+
+Model metrics saved to: E:\Project\Fake News Detection\text_model_metrics.csv
+Feature importance CSV saved to: E:\Project\Fake News Detection\xgboost_feature_importance.csv
+Feature importance chart saved to: E:\Project\Fake News Detection\xgboost_feature_importance.png
+Running notebook cell 23
+Completed fold 1/5
+Completed fold 2/5
+Completed fold 3/5
+Completed fold 4/5
+Completed fold 5/5
+
+5-fold cross-validation summary:
+                     model  accuracy_mean  accuracy_std  precision_fake_mean  precision_fake_std  recall_fake_mean  recall_fake_std  f1_fake_mean  f1_fake_std
+XGBoost - TF-IDF + numeric         0.7895        0.0135               0.7906              0.0159            0.7880           0.0228        0.7891       0.0143
+       Linear SVM - TF-IDF         0.7630        0.0196               0.7531              0.0217            0.7830           0.0208        0.7677       0.0186
+
+Per-fold metrics saved to: E:\Project\Fake News Detection\cross_validation_fold_metrics.csv
+Summary saved to: E:\Project\Fake News Detection\cross_validation_summary.csv
