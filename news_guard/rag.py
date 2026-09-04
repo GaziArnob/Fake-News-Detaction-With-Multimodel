@@ -84,7 +84,11 @@ class LocalEvidenceStore:
         )
         return len(prepared)
 
-    def query(self, claim: str, limit: int = 5) -> list[EvidenceItem]:
+    def query(self, claim: str, limit: int = 5, min_score: float = 0.30) -> list[EvidenceItem]:
+        """min_score filters out low-similarity matches that are topically
+        unrelated to the claim (e.g. score ~0.09-0.12 for an unrelated
+        story) -- passing those to the verifier LLMs as "evidence" invites
+        a confusing or wrong verdict instead of a clean "insufficient"."""
         if not claim.strip() or self.count() == 0:
             return []
         embedding = self.embedder.encode(
@@ -107,6 +111,7 @@ class LocalEvidenceStore:
                 score=round(1.0 - float(distance), 4),
             )
             for document, item_metadata, distance in zip(documents, metadata, distances)
+            if (1.0 - float(distance)) >= min_score
         ]
 
 
@@ -143,12 +148,21 @@ def search_serper(claim: str, api_key: str | None, limit: int = 5) -> list[Evide
 
 
 def build_evidence_context(items: Iterable[EvidenceItem], character_limit: int = 8_000) -> str:
+    """Per-item text is truncated (not skipped/dropped) so one long article
+    can never crowd out every other piece of evidence -- previously the
+    first item alone exceeding character_limit made the whole context empty,
+    even with several short, on-topic items right behind it."""
     blocks: list[str] = []
     used = 0
     for number, item in enumerate(items, start=1):
-        block = f"[{number}] {item.title}\nURL: {item.url}\n{item.text}".strip()
-        if used + len(block) > character_limit:
+        if used >= character_limit:
             break
+        remaining = character_limit - used
+        header = f"[{number}] {item.title}\nURL: {item.url}\n"
+        text = item.text
+        if len(header) + len(text) > remaining:
+            text = text[: max(remaining - len(header), 0)].rstrip() + "..."
+        block = (header + text).strip()
         blocks.append(block)
         used += len(block)
     return "\n\n".join(blocks) or "No retrieved evidence is available."
