@@ -75,8 +75,16 @@ def render_result(result: dict) -> None:
         else:
             st.success("Dataset model result: likely real")
     with detail_col:
-        st.write("**Extracted claim**")
-        st.write(local["claim"] or "No readable claim was extracted; review the image manually.")
+        source = result.get("claim_source", "blip_caption")
+        label = "Claim used for verification (your text)" if source == "user_provided" else "Claim used for verification (auto-caption)"
+        st.write(f"**{label}**")
+        st.write(result.get("verification_claim") or "No readable claim was extracted; review the image manually.")
+        if source == "blip_caption":
+            st.caption(
+                "No accompanying claim text was supplied, so the auto-generated image caption above was used "
+                "instead. A caption describes what is visually in the image, not what is being claimed about it -- "
+                "paste the post/forward text next time for a more reliable verification."
+            )
         st.caption(f"Caption: {local['caption'] or '—'}")
 
     st.markdown("<div class='section-label'>Dual-model verification</div>", unsafe_allow_html=True)
@@ -124,6 +132,15 @@ st.markdown(
 )
 
 uploaded = st.file_uploader("Upload a JPG, JPEG, or PNG news image", type=["jpg", "jpeg", "png"])
+claim_text = st.text_area(
+    "Optional: paste the caption/claim text circulating with this image",
+    placeholder="e.g. the post, forward, or headline text that came with this image on social media",
+    help=(
+        "An automatic image caption only describes what is visually in the picture, not what is being "
+        "claimed about it. If you have the actual text that was shared alongside this image, pasting it "
+        "here lets the verification step check the real claim instead of guessing from pixels alone."
+    ),
+)
 analyze = st.button("Analyze image", type="primary", disabled=uploaded is None)
 
 if analyze and uploaded is not None:
@@ -131,7 +148,7 @@ if analyze and uploaded is not None:
     st.image(saved_path, caption=uploaded.name, use_container_width=True)
     with st.spinner("Extracting image features…"):
         try:
-            result = service().analyze(saved_path)
+            result = service().analyze(saved_path, user_claim=claim_text)
             st.session_state["last_result"] = result
             st.session_state["last_image_path"] = str(saved_path)
         except Exception as exc:

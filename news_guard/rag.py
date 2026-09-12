@@ -9,10 +9,13 @@ from typing import Iterable
 
 import chromadb
 import requests
+import torch
+from PIL import Image
 from sentence_transformers import SentenceTransformer
+from transformers import CLIPModel, CLIPProcessor
 
 from .config import Settings
-from .features import SBERT_MODEL_ID
+from .features import CLIP_MODEL_ID, SBERT_MODEL_ID
 
 
 @dataclass(frozen=True)
@@ -111,6 +114,114 @@ class LocalEvidenceStore:
                 score=round(1.0 - float(distance), 4),
             )
             for document, item_metadata, distance in zip(documents, metadata, distances)
+            if (1.0 - float(distance)) >= min_score
+        ]
+
+
+class ImageEvidenceStore:
+    """CLIP-embedding image-to-image evidence retrieval.
+
+    LocalEvidenceStore's text search depends entirely on BLIP's caption --
+    if the caption mis-describes a text-dense or cluttered screenshot, the
+    claim it searches on is wrong and retrieval fails outright, even when
+    the very same image was already fact-checked and sitting in this
+    project's own evidence corpus. This store instead compares the
+    *uploaded image's own pixels* against known fact-checked images via
+    CLIP, independent of caption quality. It loads CLIP itself for this
+    purpose only -- it does not touch or share state with the classifier's
+    own BLIP/CLIP/SBERT feature-extraction pipeline in features.py.
+    """
+
+    collection_name = "trusted_news_evidence_images"
+
+    def __init__(self, settings: Settings, clip_model_id: str = CLIP_MODEL_ID) -> None:
+        self.settings = settings
+        self.client = chromadb.PersistentClient(path=str(settings.chroma_path))
+        self.collection = self.client.get_or_create_collection(
+            name=self.collection_name,
+            metadata={"hnsw:space": "cosine"},
+        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._clip_processor = None
+        self._clip_model = None
+        self._clip_model_id = clip_model_id
+
+    @property
+    def clip(self):
+        if self._clip_processor is None or self._clip_model is None:
+            self._clip_processor = CLIPProcessor.from_pretrained(self._clip_model_id)
+            self._clip_model = CLIPModel.from_pretrained(self._clip_model_id).to(self.device)
+            self._clip_model.eval()
+        return self._clip_processor, self._clip_model
+
+    def count(self) -> int:
+        return self.collection.count()
+
+    def _embed(self, image_path: str | Path) -> list[float]:
+        processor, model = self.clip
+        with Image.open(image_path) as opened:
+            image = opened.convert("RGB")
+        inputs = processor(images=image, return_tensors="pt").to(self.device)
+        with torch.inference_mode():
+            features = model.get_image_features(**inputs)
+            features = getattr(features, "pooler_output", features)
+            features = torch.nn.functional.normalize(features, dim=1)
+        return features.cpu().numpy()[0].tolist()
+
+    def index_images(self, records: Iterable[dict]) -> int:
+        """records: dicts with id, image_path, title, url, publisher."""
+        prepared = []
+        for record in records:
+            image_path = record.get("image_path")
+            if not image_path or not Path(image_path).exists():
+                continue
+            try:
+                embedding = self._embed(image_path)
+            except Exception:
+                continue
+            prepared.append({
+                "id": str(record["id"]),
+                "embedding": embedding,
+                "metadata": {
+                    "title": str(record.get("title", "Untitled evidence"))[:500],
+                    "url": str(record.get("url", ""))[:2_000],
+                    "publisher": str(record.get("publisher", ""))[:500],
+                },
+            })
+        if not prepared:
+            return 0
+        self.collection.upsert(
+            ids=[item["id"] for item in prepared],
+            documents=[item["metadata"]["title"] for item in prepared],
+            metadatas=[item["metadata"] for item in prepared],
+            embeddings=[item["embedding"] for item in prepared],
+        )
+        return len(prepared)
+
+    def query_by_image(self, image_path: str | Path, limit: int = 5, min_score: float = 0.75) -> list[EvidenceItem]:
+        """min_score is much higher than the text store's (0.30): CLIP
+        cosine similarity between genuinely unrelated photos still lands
+        around 0.55-0.60, so only a near-duplicate / re-shared image should
+        be treated as a match here."""
+        if self.count() == 0:
+            return []
+        embedding = self._embed(image_path)
+        result = self.collection.query(
+            query_embeddings=[embedding],
+            n_results=min(limit, self.count()),
+            include=["documents", "metadatas", "distances"],
+        )
+        metadata = result.get("metadatas", [[]])[0]
+        distances = result.get("distances", [[]])[0]
+        return [
+            EvidenceItem(
+                title=item_metadata.get("title", "Untitled evidence"),
+                text=f"Visually matches a previously fact-checked image: {item_metadata.get('title', '')}",
+                url=item_metadata.get("url", ""),
+                source_type="local_trusted_image_match",
+                score=round(1.0 - float(distance), 4),
+            )
+            for item_metadata, distance in zip(metadata, distances)
             if (1.0 - float(distance)) >= min_score
         ]
 
