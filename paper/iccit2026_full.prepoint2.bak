@@ -1,0 +1,1149 @@
+%==============================================================
+% ICCIT 2026 submission -- IEEE conference format
+% FULL VERSION: every section from the original draft is present.
+% Exceeds the 6-page ICCIT limit; see "TRIM CANDIDATES" at the bottom.
+%
+% Format: A4 paper, ANONYMOUS author block, IEEE numeric references.
+%
+%==============================================================
+% STATUS OF THE NUMBERS IN THIS FILE
+%
+% Reviewer point 1 (threshold leakage) is RESOLVED and every figure it
+% touches has been regenerated from a real, leak-free run:
+%   * AdversarialGen split 300 (adaptation) / 150 (validation) / 200 (sealed
+%     test), stratified by label, seed 42, verified to share no image.
+%   * tau selected on the 150-image validation partition only, by a rule fixed
+%     before the sweep (argmax fake-class F1, 0.01 grid, ties -> median).
+%     -> tau = 0.08 zero-shot, tau = 0.21 domain-adapted.
+%   * Sealed 200 scored exactly once at those thresholds.
+%   Source: adversarialgen_val150_sweep.csv, adversarialgen_leakfree_results.csv
+%
+% STILL OPEN (see the TODO markers):
+%   reviewer 2 -- near-duplicate detection is path-level only, not perceptual
+%                 hash / embedding; CV folds are not group-aware.
+%   reviewer 4 -- the caption-fusion pathway is still not justified by results.
+%   reviewer 5 -- the verification layer has no quantitative evaluation.
+%   reviewer 6 -- two reference records unverified; model id unverified.
+%
+% Before submitting: set \draftnotesfalse (preamble).
+%==============================================================
+\documentclass[conference,a4paper]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage{url}
+
+\graphicspath{{figures/}}
+
+%--------------------------------------------------------------
+% TWO SWITCHES.
+%   \blindsubmissiontrue  -> anonymous author block, Acknowledgment hidden
+%   \blindsubmissionfalse -> real authors + Acknowledgment printed
+%   \draftnotestrue  -> internal "verify before submission" notes PRINT
+%   \draftnotesfalse -> those notes are hidden
+%
+% >>> SET \draftnotesfalse BEFORE YOU SUBMIT. <<<
+%--------------------------------------------------------------
+\newif\ifblindsubmission
+\blindsubmissiontrue      % ICCIT 2026 requires anonymous submission
+
+\newif\ifdraftnotes
+\draftnotestrue           % <-- flip to \draftnotesfalse before submitting
+
+\newcommand{\sysname}{SignalCheck}
+
+% TODO(verify): the repository's config.py defaults GEMINI_MODEL to
+% "gemini-3.5-flash", which is not a released model name. Confirm the
+% identifier actually used and fix this macro once.
+\newcommand{\llmProprietary}{gemini-2.5-flash}
+\newcommand{\llmOpen}{gpt-oss-120b}
+
+\begin{document}
+
+%--------------------------------------------------------------
+% TITLE -- (A) active, (B) the original draft's title, commented out.
+% (B) claims "Feature Fusion" in the title, which Table I does not support.
+%--------------------------------------------------------------
+\title{\sysname: Multimodal Bangla Fake News Image Detection --
+Modality Ablation, Leak-Free Distribution-Shift Evaluation,\\
+and an Evidence-Grounded Verification Prototype}
+
+% \title{Multimodal Bangla Fake News Detection Through BLIP--CLIP
+% Feature Fusion, XGBoost Classification, and Retrieval-Augmented\\
+% Dual-LLM Verification}
+
+\ifblindsubmission
+  \author{\IEEEauthorblockN{Anonymous Submission}
+  \IEEEauthorblockA{Paper ID: XXXX}}
+\else
+  \author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
+  \IEEEauthorblockA{\textit{dept. name of organization} \\
+  \textit{name of organization}\\ City, Country \\ email or ORCID}
+  \and
+  \IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
+  \IEEEauthorblockA{\textit{dept. name of organization} \\
+  \textit{name of organization}\\ City, Country \\ email or ORCID}
+  \and
+  \IEEEauthorblockN{3\textsuperscript{rd} Given Name Surname}
+  \IEEEauthorblockA{\textit{dept. name of organization} \\
+  \textit{name of organization}\\ City, Country \\ email or ORCID}}
+\fi
+
+\maketitle
+
+\begin{abstract}
+Fake news detection for low-resource languages such as Bangla is held back by
+two things: the scarcity of large-scale, image-centric training data, and
+classifiers that report only same-distribution accuracy without any external
+evidence-verification stage. This paper presents \sysname, a two-stage
+multimodal pipeline for detecting manipulated news imagery circulating on
+Bangladeshi social media. The first stage fuses a BLIP-generated image
+caption, encoded via multilingual SBERT and refined through Cross-Image
+Semantic Fusion (CISF), with a CLIP visual embedding, and classifies the
+combined feature vector with a gradient-boosted decision tree. A systematic
+per-modality ablation on the BanFakeMM benchmark shows that CLIP visual
+features dominate classification accuracy, reaching 95.58 percent alone, and
+that no text-inclusive configuration exceeds this beyond fold-to-fold
+variation; OCR, near chance in isolation at 56.80 percent, is removed. We then
+evaluate under distribution shift with a protocol designed to be free of
+selection effects: the decision threshold is chosen on a disjoint 150-image
+validation partition and a sealed 200-image test partition is scored exactly
+once. Zero-shot transfer to an unseen manipulation style costs 9.4 points of
+accuracy and 23 points of fake-recall (95.40 to 86.0 percent, 95.75 to
+73.0 percent). A validation-selected threshold recovers most of this without
+retraining, reaching 92.0 percent accuracy and 95.0 percent fake-recall.
+Supervised adaptation on 300 target-style images adds nothing measurable on
+top ($+0.0$ points, 95 percent CI $[-3.5, +3.5]$); an earlier draft of this
+work reported a gain here, which we retract as an artifact of selecting the
+threshold on the evaluation set. The second stage is a retrieval-augmented,
+dual-independent-LLM verification layer grounded in a Bangla-language
+fact-check corpus, presented explicitly as a prototype.
+\end{abstract}
+
+%--------------------------------------------------------------
+% CCS Concepts -- an ACM block with NO IEEE equivalent, reproduced because it
+% was in the original draft. IEEE reviewers will read it as a template
+% leftover; consider deleting it.
+%--------------------------------------------------------------
+\begin{IEEEkeywords}
+\textbf{CCS Concepts:} Computing methodologies $\rightarrow$ Machine learning
+approaches; Natural language processing; Information systems $\rightarrow$
+Multimedia and multimodal retrieval.
+\end{IEEEkeywords}
+
+\begin{IEEEkeywords}
+Bangla fake news detection, multimodal misinformation, BLIP, CLIP, XGBoost,
+retrieval-augmented generation, dual-LLM verification, distribution shift,
+domain adaptation, threshold calibration, low-resource language processing
+\end{IEEEkeywords}
+
+%==============================================================
+\section{Introduction}
+%==============================================================
+
+Bangladesh's social media ecosystem---dominated by Facebook, YouTube, and
+messaging-app forwards---has become a primary vector for manipulated and
+fabricated news imagery, ranging from digitally altered photocards and forged
+documents to fully AI-generated video frames misattributed to public figures.
+Unlike text-only misinformation, this class of fake news exploits the combined
+visual and textual channel: a viral image is rarely judged on its pixels
+alone, but on the claim, caption, or context attached to it as it spreads.
+
+This problem is compounded by linguistic and cultural specificity. Bangla,
+unlike English, is a low-resource language for NLP, so most fake-news
+detection methods---sentiment, ensemble, graph, and comment-fusion models
+alike---have been built and tested only on English datasets from Western
+platforms such as LIAR, WELFake and FakeNewsNet. These systems presuppose
+signal sources such as dense comment threads or public retweet graphs that are
+frequently sparse, unavailable, or structured differently in the Bangladeshi
+context. This research identified several core problems in the current state
+of Bangla multimodal fake-news detection.
+
+\subsection{Research Problems}
+
+\begin{itemize}
+\item \textbf{Training-data scarcity.} No large-scale, organically collected,
+labeled dataset of manipulated Bangladeshi news images circulating in
+real-world settings exists; training must rely on synthetically constructed
+benchmarks such as BanFakeMM.
+
+\item \textbf{Claim-caption divergence.} An uploaded image's automatically
+generated caption describes what is visually present in it, not the claim
+being asserted about it, so a verdict cannot be reliably reached from the
+image alone.
+
+\item \textbf{Evidence-source scarcity.} Bangla-language, regionally relevant
+fact-checking corpora are far sparser than the Wikipedia-scale corpora used in
+general-purpose retrieval-augmented systems.
+
+\item \textbf{No integrated pipeline.} No prior Bangla-focused system combines
+image-level manipulation detection with an external evidence-verification
+stage in a single pipeline.
+
+\item \textbf{Same-distribution overstatement.} Same-distribution accuracy is
+routinely reported as if it were real-world reliability, without a disjoint
+evaluation to check whether a classifier has merely learned one narrow
+manipulation style---and, where such an evaluation is reported, the operating
+threshold is often tuned on the very set used to report it.
+\end{itemize}
+
+\subsection{Approach and Contributions}
+
+\begin{itemize}
+\item \textbf{Per-modality ablation.} Deciding which modalities---caption
+text, OCR text, CLIP visual features, CISF fusion---actually contribute,
+rather than including every available signal by default, and empirically
+removing OCR once ablation showed it performs near chance level in isolation.
+Results are reported with precision, recall and F1 alongside accuracy.
+
+\item \textbf{Leak-free evaluation under distribution shift.} Partitioning the
+shifted split into disjoint adaptation, validation and sealed test subsets;
+selecting the decision threshold on validation under a rule fixed in advance;
+and scoring the sealed partition exactly once. We separate what is recovered
+by thresholding from what is recovered by supervised adaptation, and report
+the latter as domain adaptation rather than unseen-style generalization.
+
+\item \textbf{A retracted result.} We report that the training-data
+diversification gain claimed in an earlier draft of this work does not survive
+a leak-free protocol, and quantify the null result with a confidence interval
+and a McNemar test.
+
+\item \textbf{Retrieval-augmented, dual-independent-LLM verification.}
+Grounding claim assessment in an actual Bangla-language fact-check evidence
+corpus rather than trusting the classifier's risk score, or a single LLM's
+unverified judgment, as a final answer. This stage is presented as a
+\emph{prototype} pending a labelled quantitative evaluation.
+
+\item \textbf{CLIP-based image-to-image evidence matching} and
+\textbf{explicit support for user-supplied claim text}, since an automatic
+image caption alone cannot state what is being claimed about an image.
+\end{itemize}
+
+While BLIP/CLIP-based multimodal classification, dual-LLM verification
+architectures, and retrieval-augmented fact-checking have each been explored
+independently in prior work, we are not aware of a study that combines
+image-level manipulation detection, a genuinely leak-free distribution-shift
+evaluation, and a retrieval-augmented dual-LLM verification stage within a
+single pipeline for a low-resource language such as Bangla. We do not claim
+architectural novelty for the fusion or verification paradigms themselves; the
+regional adaptation and the evaluation protocol are where we locate this
+work's contribution.
+
+%==============================================================
+\section{Literature Review}
+%==============================================================
+
+Research on Bangla-language fake news detection remains comparatively limited
+relative to English. BanFakeNews \cite{banfakenews} established one of the
+earliest large-scale benchmarks for this task: an annotated corpus of roughly
+50{,}000 Bangla news items labeled authentic or fabricated, introduced
+specifically because most fake-news detection methods have been developed for
+English while low-resource languages such as Bangla remain comparatively
+under-served. Subsequent work extended this line to multimodal settings.
+MultiBanFakeDetect \cite{multibanfake} combines textual and visual fusion
+techniques, reporting a hybrid DenseNet-169/mBERT fusion architecture to
+detect Bangla fake news in under-resourced contexts, and is, to our knowledge,
+the closest prior system to the present work in both language and multimodal
+scope. Beyond Bangla specifically, Bansal et al.'s MMCFND framework and its
+accompanying MMIFND dataset \cite{mmcfnd} extend multimodal, caption-aware
+fake-news detection to seven low-resource Indic languages, including Bengali,
+with roughly 28{,}000 labeled instances, and Shibu et al. \cite{banfakenews2}
+introduced BanFakeNews-2.0, a 60{,}000-instance manually curated Bangla text
+corpus (47{,}000 authentic, 13{,}000 fake).
+
+None of these systems, however, is built around a defined image-manipulation
+task with adversarially constructed positive examples---MultiBanFakeDetect
+labels whole news articles by their overall claim, and BanFakeNews-2.0 is
+text-only---nor does any of them incorporate an external evidence-retrieval or
+claim-verification component. Outside the Bangla-specific literature, EANN
+\cite{eann}, MVAE \cite{mvae}, and SpotFake \cite{spotfake} each established
+that visual and textual signals are complementary for fake-news
+classification, but each was developed and validated on English-language,
+Western-platform datasets, and none pairs classification with a
+retrieval-augmented evidence-verification stage.
+
+A more recent thread of work pairs multimodal classification with
+retrieval-augmented, multi-model evidence verification directly. DEFAME
+\cite{defame} orchestrates multiple specialized LLM-based experts against
+retrieved multimodal evidence; RAGAR \cite{ragar} applies retrieval-augmented
+reasoning to political fact-checking with multimodal large language models;
+RAMA \cite{rama} proposes a retrieval-augmented multi-agent framework for
+multimodal misinformation detection; and CaLM \cite{calm} contrasts a large
+and a small language model to verify grounded generation. None of these is
+Bangla-specific or Bangladesh-corpus-grounded.
+
+This research identified four critical limitations in the surveyed literature.
+
+\begin{itemize}
+\item \textbf{Modality-scope limitation.} Bangla-focused systems are trained
+and evaluated on curated news-article datasets rather than the screenshot- and
+photocard-style imagery commonly observed circulating on Bangladeshi social
+media.
+
+\item \textbf{Verification-scope limitation.} No Bangla-focused system, to our
+knowledge, incorporates an external evidence-retrieval or claim-verification
+stage alongside image-level classification.
+
+\item \textbf{Generalization-reporting limitation.} General-purpose
+retrieval-augmented verification systems such as DEFAME, RAGAR and RAMA are
+not Bangla-specific, and Bangla multimodal detectors do not report a disjoint
+out-of-distribution evaluation.
+
+\item \textbf{Novelty-attribution limitation.} Prior work sometimes frames
+dual-LLM or retrieval-augmented verification as architecturally novel, when
+the paradigm itself is already explored in DEFAME, RAGAR, RAMA and CaLM---the
+regional adaptation, not the architecture, is where genuine novelty should be
+claimed.
+\end{itemize}
+
+% NOTE: "genuine out-of-distribution protocol" below is the original wording.
+% Sections IV-C and V-B now state that only the zero-shot row measures
+% out-of-distribution behaviour, so consider "leak-free distribution-shift
+% protocol" here for consistency. Left as written pending your decision.
+This research addresses all four limitations simultaneously: it targets
+image-level manipulation detection on screenshot/photocard-style imagery (via
+BanFakeMM), evaluates that classifier under a genuine out-of-distribution
+protocol, adds a Bangla-grounded retrieval-augmented dual-LLM verification
+stage with direct image-to-image evidence matching, and explicitly scopes its
+novelty claim to the regional adaptation and integration rather than the
+underlying verification paradigm.
+
+%==============================================================
+\section{Methodology}
+%==============================================================
+
+\subsection{System Architecture}
+
+\sysname{} consists of two cooperating stages. The first is a local multimodal
+classifier that assigns a fake-probability score to an uploaded image using
+only its visual and captioned content. The second is an evidence-grounded
+verification layer that retrieves independently sourced fact-check
+evidence---matched either by the image's own pixels or by its associated claim
+text---and produces an evidence-based verdict using two independently
+configured large language models. The two stages are complementary: the
+classifier provides a fast, dataset-trained risk signal even when no external
+evidence exists, while the verification layer provides claim-level,
+provenance-backed reasoning whenever relevant evidence can be found.
+Fig.~\ref{fig:arch} illustrates the complete pipeline, including the
+retrieval-augmented generation boundary within the verification stage.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_architecture.png}
+\caption{\sysname{} system architecture---local multimodal classifier (top)
+and retrieval-augmented dual-LLM verification layer (bottom).}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Dataset and Partitioning}
+\label{sec:data}
+
+The classifier is trained and evaluated on the AdversarialEdit split of the
+public BanFakeMM benchmark \cite{banfakemm}: 2{,}000 images, 1{,}000 authentic
+and 1{,}000 manipulated, giving a class-balanced base dataset. BanFakeMM
+constructs its ``fake'' images through a defined editing or generation
+pipeline rather than through subjective human annotation of ambiguous
+real-world content, so ground-truth labels are deterministic by construction.
+
+Behaviour under distribution shift is measured on BanFakeMM's AdversarialGen
+split (2{,}000 fully AI-generated images), which is divided into three
+mutually disjoint subsets:
+
+\begin{itemize}
+\item \textbf{300 images} used only for the supervised adaptation experiment
+of Section~\ref{sec:shift};
+\item \textbf{150 images} (75 authentic, 75 manipulated) used only for
+decision-threshold selection;
+\item \textbf{200 images} (100 authentic, 100 manipulated) sealed as the final
+test partition, used in no training, tuning, or threshold-selection step and
+scored exactly once.
+\end{itemize}
+
+Assignment is stratified by label with a fixed seed (42), and the three
+subsets were verified programmatically to share no image. The remaining
+1{,}500 AdversarialGen images are unused.
+
+% TODO(reviewer-2, BLOCKING): run a perceptual-hash (pHash/dHash) and
+% CLIP-embedding near-duplicate sweep across all partitions, report how many
+% duplicate clusters were found, and rebuild the cross-validation folds with
+% GroupKFold grouped by cluster and source article. Then replace the
+% disclosure below with the verified result.
+\emph{Disclosure: duplicate verification.} Partition disjointness is
+established by absolute image path, not by perceptual hashing or embedding
+similarity, so visually near-identical images could in principle straddle two
+partitions. Cross-validation folds on the base split are likewise assigned at
+the image level by stratified randomization rather than grouped by source
+article or near-duplicate cluster. Residual near-duplicate leakage is
+therefore an unresolved risk rather than a ruled-out one, and the
+same-distribution figures in Section~\ref{sec:ablation} should be read with
+that caveat. The distribution-shift results of Section~\ref{sec:shift} are
+less exposed to it, since the two splits are generated by different pipelines.
+
+\subsubsection{Preprocessing steps}
+
+\begin{itemize}
+\item \textbf{Captioning and OCR.} A BLIP model generates a natural-language
+caption describing each image's visual content. OCR-based text extraction was
+evaluated during an earlier ablation phase and found to perform near the
+chance level in isolation on this dataset (56.80 percent accuracy); since the
+final CLIP-based configuration achieved comparable accuracy without it, OCR
+was excluded from the final preprocessing pipeline.
+
+\item \textbf{Text processing and embedding.} The caption is tokenized and
+stemmed, with separate handling for English and Bangla script, to produce a
+processed-text representation used for TF-IDF features, and separately encoded
+into a dense semantic embedding via a multilingual SBERT model.
+
+\item \textbf{Visual embedding.} A CLIP vision encoder independently extracts
+a 512-dimensional visual embedding directly from the image pixels.
+
+\item \textbf{Evidence corpus construction.} The verification layer's evidence
+corpus is built independently of the classifier's training data, from a single
+Bangla-language fact-checking publisher (Rumor Scanner), via a sitemap-based
+and keyword-targeted scraping process. Of the 1{,}521 documents indexed,
+1{,}465 (96 percent) include the article's full body text; the remaining 56
+(4 percent) fall back to a headline-level summary.
+\end{itemize}
+
+\subsection{Multimodal Feature Fusion and Classification}
+
+For each input image, three complementary representations are extracted. The
+BLIP caption is encoded into a semantic embedding using SBERT, then refined
+through Cross-Image Semantic Fusion (CISF): the embedding is combined with the
+weighted average of its $k=5$ nearest semantic neighbours within the training
+corpus, using a fusion weight of $\alpha=0.65$ favouring the original
+embedding, and the fused vector is re-normalized and reduced to 32 principal
+components via PCA. In parallel, the CLIP visual embedding (512-dimensional)
+is separately reduced to 64 principal components via its own PCA transform,
+fit only on the training fold in the same way as the caption pathway's
+reduction---this keeps the two embedding blocks on a comparable scale relative
+to the lower-dimensional TF-IDF and numeric features.
+
+The neighbour count ($k=5$), fusion weight ($\alpha=0.65$), and target
+dimensionality (32 components) were fixed design choices for this study rather
+than selected through a dedicated validation search; a systematic sensitivity
+study over these hyperparameters, and comparison against adaptive fusion
+mechanisms such as MMFusionNet \cite{mmfusionnet} or CLAAF \cite{claaf}, is
+left for future work. To prevent leakage, each training embedding's own
+nearest-neighbour search excludes itself when the fusion reference set is
+constructed, and at inference time an unseen image's embedding is compared
+only against this fixed, pre-established training-set reference.
+
+The final feature vector concatenates four blocks, each fit only on the
+training fold: the 32-component CISF-fused caption embedding, the 64-component
+CLIP embedding, a TF-IDF representation over the processed caption text
+(unigrams and bigrams, vocabulary capped at 5{,}000 features, minimum document
+frequency 3), and a small set of auxiliary numeric features (token counts,
+neighbour-similarity statistics). This combined representation is passed to a
+gradient-boosted decision tree classifier (XGBoost).
+
+\subsection{Training Configuration and Threshold Selection}
+\label{sec:training}
+
+XGBoost hyperparameters were selected via randomized search (scikit-learn's
+\texttt{RandomizedSearchCV}, 8 sampled configurations under 3-fold
+cross-validation, scored by fake-class F1)---a comparatively small search
+budget chosen for computational cost. The selected configuration is
+\texttt{max\_depth}~3, \texttt{learning\_rate}~0.0742,
+\texttt{n\_estimators}~443, \texttt{subsample}~0.866,
+\texttt{colsample\_bytree}~0.683, \texttt{min\_child\_weight}~2,
+\texttt{gamma}~0.143, \texttt{reg\_alpha}~$1.01\times10^{-5}$ and
+\texttt{reg\_lambda}~4.911.
+
+The classifier outputs a fake-probability score in $[0,1]$. The operating
+threshold is selected on held-out validation data and never on the evaluation
+partition. The selection rule was fixed before the sweep was run: $\tau$ is
+the threshold maximizing fake-class F1 on the 150-image validation partition
+over a $0.01$-step grid, with ties broken by the median of the tied run. This
+yields $\tau = 0.08$ for the zero-shot model and $\tau = 0.21$ for the
+domain-adapted model (Fig.~\ref{fig:sweep}). The sealed 200-image test
+partition is then scored exactly once at the corresponding threshold, after
+all training and threshold decisions are frozen, and is used for no tuning of
+any kind.
+
+Per-modality ablation results (Section~\ref{sec:ablation}) come from repeated
+stratified 5-fold cross-validation (2 repeats per configuration, 10 folds
+total), with identical fold splits and fixed hyperparameters held constant
+across every evaluated feature configuration. All dimensionality-reduction
+transforms, vocabularies and neighbour reference sets are fit inside the
+training fold only. Every same-distribution figure in
+Section~\ref{sec:ablation} is computed at the conventional $\tau = 0.50$
+cut-off, not at a tuned threshold: no threshold search is performed on the
+base split at all, so those numbers carry no selection effect. Threshold
+selection is confined to the distribution-shift experiment, where the
+asymmetric cost of a missed manipulation makes the operating point a real
+design decision.
+
+\emph{Reproducibility.} Fold assignment, the randomized search, the PCA
+transforms and the classifier all use a fixed random seed of 42. Software
+versions, exact BLIP/CLIP/SBERT checkpoint identifiers, hardware and
+end-to-end runtime are given in the supplementary material; the partition
+manifests, per-image probabilities, the full validation sweep and the sealed
+test results are released alongside the code.
+
+\subsection{Retrieval-Augmented Dual-LLM Verification}
+\label{sec:verify}
+
+The claim to be verified is determined by priority: a user-supplied claim
+text, if provided, is used directly; otherwise the BLIP caption is used as a
+fallback. In parallel, the uploaded image's own CLIP embedding is compared
+against the embeddings of images from previously fact-checked articles; a
+similarity threshold of 0.90 is used to treat a match as strong evidence that
+this exact image has already been independently verified---unrelated image
+pairs typically scored 0.55--0.60 on CLIP cosine similarity during
+development, while genuine re-shared copies scored 0.90 or above, though this
+threshold reflects an approximate empirical separation rather than a formally
+calibrated precision/recall curve.
+
+When a direct match is found, the system reports the matched article and its
+similarity score as evidence rather than asserting a final truth verdict on
+its own, since an image match establishes only that the image has previously
+circulated and been fact-checked, not that the claim currently attached to it
+is the same claim the matched article addressed. When no direct match exists,
+the resolved claim text queries the local evidence store via SBERT-based
+semantic similarity search (top-5 matches, minimum similarity 0.30), and,
+separately, live web-search results are retrieved. Both are passed to two
+independently configured large language models---\texttt{\llmProprietary} and
+the open-weight \texttt{\llmOpen}, served through Groq's inference API at
+temperature 0---each given an identical prompt containing the claim and the
+retrieved evidence, instructed to return a JSON verdict (\emph{supported},
+\emph{contradicted}, or \emph{insufficient}) with a confidence score, a
+rationale, and cited source URLs.
+
+Each model is queried independently, with no visibility into the other's
+output. A consensus verdict is returned only when both models complete
+successfully and agree; if either model errors, is not configured, or the two
+models disagree, the system withholds a consensus verdict and flags the case
+as needing human review, rather than defaulting to whichever single response
+is available.
+
+% TODO(reviewer-5, BLOCKING if the prototype framing is dropped): build a
+% labelled claim set (target 150-200 claims with adjudicated
+% supported/contradicted/insufficient labels), then report retrieval recall@1
+% and recall@5, verdict accuracy and macro-F1, abstention rate, image-match
+% precision at the 0.90 threshold, a table of 2-3 worked examples, and a
+% single-LLM versus dual-LLM consensus comparison. RAGProbe [18] and the RAG
+% metric survey [17] are cited below as starting points.
+\emph{Scope.} Both the 0.90 similarity threshold and the consensus rule are
+practical operating points set from informal development observation, not from
+a calibrated precision/recall study. No labelled claim set, retrieval metric,
+verdict-accuracy measurement, or single-versus-dual-LLM comparison is reported
+in this paper, and no sustained deployment trial was conducted. Accordingly
+this stage is presented as a working prototype that demonstrates feasibility
+and defines an evaluation target, not as a validated verification system, and
+none of the quantitative claims in this paper depend on it.
+
+\subsection{Evaluation Metrics}
+
+Classification results are reported as accuracy, precision, recall and F1 for
+the manipulated class, with real-class recall additionally reported under
+distribution shift, since accuracy alone can mask asymmetric degradation
+between classes. Fake-recall is treated as the more safety-critical metric,
+since a missed manipulated image can circulate unchecked whereas a false alarm
+on an authentic image costs only a review step; this asymmetric cost is why
+the selection rule of Section~\ref{sec:training} maximizes fake-class F1.
+Accuracy on the sealed test partition is accompanied by a bootstrap 95 percent
+confidence interval (5{,}000 resamples), and the adaptation contrast is tested
+with McNemar's test on discordant predictions.
+
+For the evidence-verification layer, no formal quantitative metric is defined
+in this paper; verdicts are instead assessed through qualitative case studies
+covering both evidence-available and evidence-unavailable scenarios, and a
+complete quantitative evaluation is identified as future work in
+Section~\ref{sec:limitations}.
+
+%==============================================================
+\section{Experimental Results}
+%==============================================================
+
+\subsection{Classifier Ablation Performance}
+\label{sec:ablation}
+
+\begin{table}[t]
+\caption{Per-Modality Ablation on the Base Split, Repeated Stratified 5-Fold
+Cross-Validation ($2$ Repeats, $10$ Folds). Accuracy Shown as Mean $\pm$
+Standard Deviation Across Folds. All Values in Percent.}
+\label{tab:ablation}
+\centering
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Configuration} & \textbf{Acc.} & \textbf{Prec.$_{f}$} &
+\textbf{Rec.$_{f}$} & \textbf{F1$_{f}$} \\
+\midrule
+OCR only              & 56.80 $\pm$ 1.78 & 63.44 & 32.55 & 42.94 \\
+Caption only          & 74.40 $\pm$ 1.79 & 75.05 & 73.15 & 74.07 \\
+Text only             & 76.55 $\pm$ 2.01 & 76.75 & 76.25 & 76.48 \\
+Text + CISF           & 77.48 $\pm$ 1.37 & 77.43 & 77.65 & 77.50 \\
+\midrule
+CLIP only             & \textbf{95.58} $\pm$ 0.92 & 95.12 & 96.10 & 95.59 \\
+Text + CLIP           & 95.43 $\pm$ 0.83 & 95.16 & 95.75 & 95.44 \\
+CLIP + CISF           & \textbf{95.58} $\pm$ 1.01 & 95.25 & 95.95 & 95.59 \\
+Caption + CISF + CLIP & 95.40 $\pm$ 0.97 & 95.10 & 95.75 & 95.41 \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Subscript $f$ denotes the manipulated
+(``fake'') class.}
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig1_ablation.png}
+\caption{Per-modality ablation accuracy (repeated stratified 5-fold
+cross-validation).}
+\label{fig:ablation}
+\end{figure}
+
+Table~\ref{tab:ablation} and Fig.~\ref{fig:ablation} report every feature
+configuration under an identical protocol. Three results matter.
+
+First, OCR text in isolation reaches 56.80 percent accuracy, close to the
+50 percent chance baseline for this balanced binary task, with fake-recall of
+only 32.55 percent. This is the empirical basis for removing OCR. We do not
+generalize this beyond BanFakeMM: MultiBanFakeDetect \cite{multibanfake}
+indicates that text-in-image remains a meaningful vector for Bangla
+misinformation more broadly, and BanFakeMM's manipulations are photographic
+rather than text-embedded.
+
+Second, all text-only configurations saturate below 78 percent, while any
+configuration containing CLIP exceeds 95 percent. Visual features, not caption
+text or its derived properties, carry the discriminative signal for this task.
+
+Third---and this is a negative result we report rather than obscure---no
+text-inclusive configuration exceeds CLIP alone. CLIP-only reaches
+95.58 $\pm$ 0.92 percent; adding CISF on top leaves it unchanged at
+95.58 $\pm$ 1.01; the full caption+CISF+CLIP configuration reaches
+95.40 $\pm$ 0.97, marginally \emph{below} CLIP alone. The largest gap among
+CLIP-containing configurations is 0.18 points against a per-fold standard
+deviation of roughly 0.9--1.0 points, so these configurations are
+indistinguishable at this sample size.
+
+% TODO(reviewer-4, BLOCKING): the fusion architecture is not justified by
+% these numbers. Before submission do ONE of:
+%   (a) demonstrate a measurable benefit -- run CLIP-only vs. fusion on the
+%       sealed test partition of Table II, report a paired test and a
+%       bootstrap CI on the difference, and add calibration (ECE/Brier) and
+%       AUROC; if fusion wins on robustness or calibration, say so; OR
+%   (b) simplify -- make CLIP + XGBoost the proposed model, retitle, and
+%       demote CISF to a reported negative result.
+% The paragraph below is honest but is NOT a substitute for either.
+\emph{On the fusion design.} On same-distribution accuracy the caption pathway
+earns its place only if it contributes robustness or calibration rather than
+accuracy, which Table~\ref{tab:ablation} does not measure. Retaining a
+multimodal architecture is not by itself a justification. We therefore report
+the final configuration's parity with CLIP-only as an open question about the
+fusion design rather than as a positive result, and treat CLIP-only as the
+operative baseline any fusion must beat.
+
+\subsection{Final Configuration Evaluation}
+
+The selected final configuration---caption text fused via CISF, combined with
+CLIP features, without OCR---reaches 95.40 $\pm$ 0.97 percent
+same-distribution accuracy, with fake-class precision 95.10 percent, recall
+95.75 percent and F1 95.41 percent. These are cross-validated means rather
+than a single held-out confusion matrix, since the base-split protocol
+(Section~\ref{sec:training}) uses repeated $k$-fold cross-validation rather
+than one fixed train/test split; per-fold true and false-positive counts were
+not separately retained, so a single confusion matrix for the base split is
+not reported here.
+
+\subsection{Performance Under Distribution Shift}
+\label{sec:shift}
+
+\begin{table}[t]
+\caption{Evaluation Under Distribution Shift. Thresholds Were Selected on a
+Disjoint 150-Image Validation Partition; the Sealed 200-Image Test Partition
+(100/100 Balanced) Was Scored Exactly Once. All Values in Percent.}
+\label{tab:shift}
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Setting} & \textbf{$\tau$} & \textbf{Acc.} & \textbf{Prec.$_{f}$} &
+\textbf{Rec.$_{f}$} & \textbf{Rec.$_{r}$} & \textbf{F1$_{f}$} \\
+\midrule
+\multicolumn{7}{l}{\emph{Zero-shot transfer (no target-style data in training)}} \\
+Default threshold   & 0.50 & 86.0 & 98.6 & 73.0 & 99.0 & 83.9 \\
+Validation-selected & 0.08 & \textbf{92.0} & 89.6 & 95.0 & 89.0 & 92.2 \\
+\midrule
+\multicolumn{7}{l}{\emph{Supervised domain adaptation ($+300$ AdversarialGen images)}} \\
+Validation-selected & 0.21 & \textbf{92.0} & 90.4 & 94.0 & 90.0 & 92.2 \\
+\bottomrule
+\multicolumn{7}{p{0.95\columnwidth}}{\footnotesize Bootstrap 95\% confidence
+intervals on accuracy (5{,}000 resamples): $[81.0, 90.5]$, $[88.0, 95.5]$ and
+$[88.0, 95.5]$ respectively. Subscripts $f$ and $r$ denote the manipulated and
+authentic classes.}
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig4_threshold_sweep.png}
+\caption{Fake-class F1 against decision threshold on the 150-image validation
+partition. $\tau^{*}$ is the argmax under the rule fixed in
+Section~\ref{sec:training}; the sealed test partition plays no part in this
+selection.}
+\label{fig:sweep}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig2_ood_progression.png}
+\caption{Accuracy, fake-recall and real-recall on the sealed test partition
+across the three settings of Table~\ref{tab:shift}.}
+\label{fig:progression}
+\end{figure}
+
+At the default threshold the classifier transfers poorly to the unseen
+manipulation style: accuracy falls from 95.40 percent same-distribution to
+86.0 percent, and fake-recall from 95.75 to 73.0 percent. The 23-point
+fake-recall collapse, not the 9.4-point accuracy drop, is the operationally
+meaningful number---27 of 100 manipulated images pass undetected while only
+1 of 100 authentic images is misflagged. This asymmetry is consistent with a
+decision boundary calibrated tightly around the training distribution's
+specific manipulation signature.
+
+Applying the validation-selected threshold ($\tau = 0.08$), without retraining
+and without any further tuning, raises sealed-test accuracy to 92.0 percent
+and fake-recall to 95.0 percent, at a cost of 10 points of real-recall. Almost
+the entire shift penalty is therefore a calibration effect rather than a
+failure of the underlying visual discrimination: the ranking of images by
+fake-probability already separates the two classes well, and only the operating
+point was wrong.
+
+\emph{Supervised adaptation adds nothing measurable on top of this.}
+Retraining with 300 additional AdversarialGen images and again selecting the
+threshold on the validation partition ($\tau = 0.21$) also reaches
+92.0 percent. The accuracy difference against the zero-shot model is $+0.0$
+points with a bootstrap 95 percent confidence interval of $[-3.5, +3.5]$, and
+McNemar's test on the 6 versus 6 discordant predictions gives $p = 1.00$. An
+earlier draft of this work reported a 90.0 $\rightarrow$ 91.5 percent gain
+from this diversification step; that gain was an artifact of selecting the
+decision threshold on the evaluation set itself, and it does not survive a
+disjoint validation partition. We report the null result rather than the
+earlier figure.
+
+\subsection{Confusion Matrix Analysis Under Shift}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig3_confusion_matrices.png}
+\caption{Confusion matrices on the sealed test partition: zero-shot at the
+default threshold (left) versus the domain-adapted model at its
+validation-selected threshold (right).}
+\label{fig:cm}
+\end{figure}
+
+Fig.~\ref{fig:cm} makes the trade-off directly visible. At the default
+threshold the classifier misclassifies only 1 of 100 authentic images but
+misses 27 of 100 manipulated ones. Under the validation-selected threshold the
+domain-adapted model is substantially more balanced: 94 of 100 manipulated
+images caught (6 missed) and 90 of 100 authentic images passed (10
+misflagged). For a screening system whose false alarms cost a review step and
+whose misses let manipulated imagery circulate, this is the operating point
+the asymmetric cost argues for. The residual gap to the 95.40 percent
+same-distribution ceiling is an honest bound on demonstrated behaviour under
+shift, not evidence that the gap has closed.
+
+\subsection{Baseline Comparison}
+
+\begin{table}[t]
+\caption{Baseline Comparison Under the Identical Cross-Validation Protocol.
+All Values in Percent.}
+\label{tab:baselines}
+\centering
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Acc.} & \textbf{Prec.$_{f}$} &
+\textbf{Rec.$_{f}$} & \textbf{F1$_{f}$} \\
+\midrule
+Linear SVM (TF-IDF)     & 76.30 $\pm$ 1.96 & 75.31 & 78.30 & 76.77 \\
+XGBoost (TF-IDF + num.) & 78.95 $\pm$ 1.35 & 79.06 & 78.80 & 78.91 \\
+\midrule
+CLIP only               & 95.58 $\pm$ 0.92 & 95.12 & 96.10 & 95.59 \\
+Proposed (final)        & 95.40 $\pm$ 0.97 & 95.10 & 95.75 & 95.41 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig5_baselines.png}
+\caption{Multimodal configuration against text-only baselines under the
+identical cross-validation protocol.}
+\label{fig:baselines}
+\end{figure}
+
+Table~\ref{tab:baselines} and Fig.~\ref{fig:baselines} compare the multimodal
+final configuration against two text-only baselines under the same protocol,
+with all four metrics reported for every row. A linear SVM on TF-IDF features
+reaches 76.30 $\pm$ 1.96 percent accuracy, and an XGBoost classifier on TF-IDF
+plus auxiliary numeric features reaches 78.95 $\pm$ 1.35 percent---both
+roughly 16--19 percentage points below any CLIP-containing configuration. This
+confirms that visual features provide the primary discriminative signal for
+this manipulation-detection task. We include the CLIP-only row deliberately:
+it is the baseline the proposed configuration must beat, and at present it
+does not.
+
+\subsection{Key Observations}
+
+\begin{itemize}
+\item CLIP visual features alone match or exceed every text-inclusive
+configuration on this dataset---the dataset's manipulations are photographic,
+not text-embedded, so visual features dominate.
+
+\item OCR contributes no measurable benefit on BanFakeMM specifically; this is
+not generalized as a claim about Bangla misinformation broadly, since
+MultiBanFakeDetect \cite{multibanfake} indicates text-in-image remains a
+meaningful vector in this language more broadly.
+
+\item The zero-shot distribution-shift gap (95.40 $\rightarrow$ 86.0 percent
+accuracy, 95.75 $\rightarrow$ 73.0 percent fake-recall) is substantial even
+for a well-performing same-distribution classifier.
+
+\item Almost all of that gap is a \emph{calibration} effect: a threshold
+chosen on disjoint validation data recovers accuracy to 92.0 percent and
+fake-recall to 95.0 percent with no retraining at all.
+
+\item Supervised adaptation on 300 target-style images adds nothing measurable
+once the threshold is selected honestly ($+0.0$ points, 95 percent CI
+$[-3.5, +3.5]$, McNemar $p = 1.00$). Where the threshold is tuned on the
+evaluation set instead, the same comparison appears to show a 1.5-point gain.
+\end{itemize}
+
+\subsection{Verification Layer Behaviour}
+
+Unlike the classifier, the verification layer is evaluated qualitatively
+through targeted case studies covering in-scope claims (relevant fact-check
+evidence exists in the local corpus) and out-of-scope claims (none exists),
+rather than through a live deployment trial or a quantitative benchmark. These
+case studies were not sampled according to a documented procedure and do not
+report inter-annotator agreement, so they are illustrative of the system's
+operation under both conditions rather than a validated measurement of
+verification accuracy or reliability.
+
+A local demonstration application implementing this pipeline was used to
+exercise both the direct-image-match and dual-LLM-verification paths during
+development, but no live, sustained-monitoring deployment trial was conducted
+for this paper; this is stated explicitly rather than implied.
+
+% TODO(reviewer-5): add a worked-examples table here -- 2-3 real claims with
+% the retrieved evidence, both models' verdicts, and the consensus outcome.
+% The reviewer explicitly asked for "actual examples"; none are currently
+% shown anywhere in the paper.
+
+%==============================================================
+\section{Discussion}
+%==============================================================
+
+\subsection{Visual-versus-Textual Modality Trade-off Analysis}
+
+The ablation outcomes are explained by the nature of BanFakeMM's manipulations
+rather than by any inherent weakness in text-based features generally. The
+dataset's fake images are produced through pixel-level editing or full-image
+AI generation, so the evidence of manipulation is encoded directly in visual
+texture, lighting consistency, and generation artifacts---exactly the signal
+CLIP's visual encoder is trained to capture. A caption or OCR-derived text
+feature can only reflect manipulation indirectly, which is a much weaker and
+noisier proxy; this explains both OCR's near-chance standalone performance and
+CLIP's dominance once included. This also bounds the finding: on a corpus
+where manipulation is carried by embedded text, the ranking could invert.
+
+The absence of a measurable CISF contribution on top of CLIP is similarly
+explainable rather than anomalous. CISF's neighbour-weighted fusion mechanism
+is designed to sharpen a semantic embedding by borrowing signal from similar
+items in the training corpus---a mechanism suited to text embeddings that
+benefit from smoothing against semantically related neighbours. One plausible
+explanation for CISF's limited effect on CLIP is that CLIP's visual embedding
+already encodes a rich, high-dimensional description of the image directly
+from pixels, leaving comparatively little redundant noise for neighbour-fusion
+to average away---though this is inferred from the observed ablation pattern
+rather than independently verified.
+
+\subsection{Calibration Versus Representation Under Shift}
+
+The distribution-shift results separate two failure modes that a single
+accuracy figure conflates. A model can fail under shift because its learned
+representation does not transfer, or because its representation transfers but
+its operating point does not. Our results point firmly at the second. The
+zero-shot model's ranking of shifted images by fake-probability is good enough
+that a threshold of 0.08---chosen without ever seeing the test
+partition---recovers 92.0 percent accuracy and 95.0 percent fake-recall.
+What failed at the default 0.50 cut-off was calibration: the shifted fakes
+receive systematically lower probabilities than the training-style fakes did,
+so a boundary tuned for one manipulation style rejects the other.
+
+This reframes what the 300 adaptation images were doing. Under a threshold
+tuned on the evaluation set, they appeared to add 1.5 points; under a
+validation-selected threshold they add nothing, because thresholding had
+already captured the available headroom. Whether a larger or more diverse
+adaptation set would help remains open---300 images is a small intervention
+against a 1{,}600-image training set---but this experiment does not support the
+claim that it does, and we do not make it.
+
+We note the boundary of this claim: both splits come from the same benchmark
+and differ in manipulation style (localized AI editing versus full-image AI
+generation), not in image source or capture conditions. A shift that also
+changes provenance, resolution or compression could plausibly damage the
+representation itself rather than only the operating point.
+
+\subsection{Addressing the Research Problems}
+
+\begin{itemize}
+\item \textbf{Training-data scarcity:} addressed through BanFakeMM's
+adversarially constructed training set combined with an explicit, sealed
+distribution-shift evaluation---rather than assuming same-distribution
+accuracy generalizes to deployment.
+
+\item \textbf{Claim-caption divergence:} addressed by supporting
+user-supplied claim text as a first-priority input to the verification layer,
+with the BLIP caption used only as a documented fallback.
+
+\item \textbf{Evidence-source scarcity:} addressed by building a dedicated
+Bangla-language evidence corpus, while explicitly acknowledging its
+single-publisher composition as a scoping limitation.
+
+\item \textbf{Missing verification stage:} addressed by adding a
+retrieval-augmented, dual-independent-LLM verification layer with direct
+image-to-image evidence matching, evaluated qualitatively and scoped as a
+prototype rather than overstated.
+
+\item \textbf{Same-distribution overstatement:} addressed by reporting the
+zero-shot shifted result (86.0 percent accuracy, 73.0 percent fake-recall)
+alongside the same-distribution result (95.40 percent), by selecting the
+operating threshold on disjoint validation data, and by retracting a
+previously claimed adaptation gain that did not survive that protocol.
+\end{itemize}
+
+\subsection{Verification Layer Reliability Considerations}
+
+Because the verification layer's central role is evidence-grounded claim
+assessment, its reliability considerations differ from the classifier's. Two
+design choices bound how much confidence should be placed in its output today.
+First, the dual-LLM consensus rule is deliberately conservative: a verdict is
+returned only when both models complete and agree, and any disagreement or
+failure is routed to human review rather than silently resolved by one model's
+output---this avoids overstating confidence, at the cost of leaving more cases
+unresolved automatically. Second, the 0.90 image-similarity threshold used for
+direct-match evidence was set from an informal empirical separation observed
+during development, not a labelled precision/recall study, so it should be
+treated as a practical operating point rather than a statistically validated
+boundary. Both choices trade automation for caution; a production deployment
+intending to reduce the human-review rate would need the quantitative
+verification-layer evaluation identified in Section~\ref{sec:limitations}
+before relaxing either safeguard.
+
+\subsection{Limitations and Future Directions}
+\label{sec:limitations}
+
+Several limitations bound this work, in addition to the two disclosures
+already stated in Sections~\ref{sec:data} and \ref{sec:verify}.
+
+Ground-truth labels throughout this study derive from BanFakeMM's own
+deterministic construction process, so the classifier's demonstrated
+competence is specific to detecting this class of algorithmic image
+manipulation, not to adjudicating whether a news item's overall claim is
+true---a task the verification layer, not the classifier, is meant to address.
+The distribution-shift evaluation, while sealed and leak-free with respect to
+threshold selection, is drawn from a second split of the same underlying
+benchmark; generalization to manipulation styles and image sources entirely
+outside BanFakeMM, including organically collected real-world Bangladeshi
+social media imagery, remains an open question.
+
+The evidence-verification layer's evaluation in this paper is qualitative
+rather than quantitative. A formal evaluation protocol---retrieval recall@$k$
+against a labelled evidence set, verdict accuracy against ground-truth-labeled
+claims---is left to future work; established RAG-evaluation frameworks such as
+RAGProbe \cite{ragprobe} and the faithfulness, context-relevance and
+answer-relevance metrics summarized by Roychowdhury et al. \cite{ragmetrics}
+are a concrete starting point, alongside expanding the evidence corpus beyond
+its current single fact-checking source.
+
+Threshold calibration is a data-centric mitigation. Architecture-level
+alternatives---CLIPood's fine-tuning-based approach to CLIP
+out-of-distribution generalization \cite{clipood}, domain-specific
+prompt-tuning approaches such as DPOD \cite{dpod}---were not evaluated here.
+Threshold-independent metrics such as AUROC and FPR@95, and calibration
+metrics such as expected calibration error and Brier score, were not computed,
+although the results of Section~\ref{sec:shift} suggest calibration analysis
+is exactly where the remaining headroom lies. Finally, this pipeline addresses
+static image manipulation; extending it to video-based misinformation would
+require a substantially different technical approach.
+
+%==============================================================
+\section{Conclusion}
+%==============================================================
+
+Practical Bangla misinformation detection demands more than a
+same-distribution accuracy figure---it requires a distribution-shift check
+that is free of selection effects, an honest account of which modalities
+actually contribute, and, where a classification score alone is insufficient,
+an evidence-grounded verification stage.
+
+This research contributes: (1) a multimodal Bangla fake-news image classifier
+combining BLIP, SBERT/CISF and CLIP features, with its final configuration
+selected through per-modality ablation rather than default inclusion of every
+signal; (2) an empirically justified architectural simplification---OCR
+removed after ablation showed it performs near chance level; (3) a leak-free
+distribution-shift protocol---disjoint adaptation, validation and sealed test
+partitions, a selection rule fixed in advance, and a single scoring of the
+sealed partition---which quantifies a real zero-shot gap (95.40 $\rightarrow$
+86.0 percent accuracy, 95.75 $\rightarrow$ 73.0 percent fake-recall) and shows
+that a validation-selected threshold recovers it to 92.0 percent without
+retraining; (4) a retracted result, reported as such: supervised adaptation on
+300 target-style images adds nothing measurable once the threshold is chosen
+honestly; (5) a retrieval-augmented, dual-independent-LLM verification
+prototype grounded in a Bangla-language evidence corpus; and (6) transparent
+reporting of the concrete limitations of both components.
+
+The gap between a high same-distribution accuracy figure and a system that
+behaves reliably outside its training distribution is real and, on this task,
+substantial---but our results locate most of it in calibration rather than in
+the learned representation, which is both a cheaper problem to fix and an
+easier one to get wrong when the operating point is tuned on the test set.
+
+Two directions remain open. First, a paired significance and calibration
+comparison is needed to decide whether the caption-fusion pathway is retained
+or the classifier simplified to CLIP-only, since the two are currently
+indistinguishable. Second, a labelled claim set with retrieval and verdict
+metrics is needed to promote the verification stage from prototype to
+evaluated component. Future work should also extend this evaluation to
+organically collected Bangladeshi social media imagery and broaden the
+evidence corpus beyond its current single publisher.
+
+%==============================================================
+% ACKNOWLEDGMENT -- hidden while \blindsubmissiontrue.
+%==============================================================
+\ifblindsubmission\else
+\section*{Acknowledgment}
+The authors thank [NAMES] for their support of this work. [Add funding
+agency and grant number here if applicable; delete this section entirely if
+neither applies.]
+\fi
+
+%==============================================================
+\begin{thebibliography}{00}
+
+% TODO(reviewer-6, BLOCKING): the BanFakeMM record could not be independently
+% verified -- supply curator, year and DOI from the Mendeley Data landing page.
+\bibitem{banfakemm} ``BanFakeMM: Bangla multimodal fake news dataset,''
+Mendeley Data. [Online]. Available: \url{https://data.mendeley.com/}
+\ifdraftnotes\\\emph{\footnotesize [DRAFT NOTE -- REMOVE BEFORE SUBMISSION]
+Dataset citation incomplete: no DOI, curator name, or year could be
+independently verified; the exact Mendeley record must be supplied.}\fi
+
+\bibitem{banfakenews} M. Z. Hossain, M. A. Rahman, M. S. Islam, and S. Kar,
+``BanFakeNews: A dataset for detecting fake news in Bangla,'' in
+\emph{Proc. 12th Lang. Resources and Evaluation Conf. (LREC)}, Marseille,
+France, 2020, pp. 2862--2871.
+
+\bibitem{multibanfake} F. T. J. Faria \emph{et al.},
+``MultiBanFakeDetect: Integrating advanced fusion techniques for multimodal
+detection of Bangla fake news in under-resourced contexts,''
+\emph{Int. J. Inf. Manage. Data Insights}, 2025.
+
+\bibitem{banfakenews2} H. M. Shibu, S. Datta, M. S. Miah, N. Sami,
+M. S. Chowdhury, and M. S. Islam, ``From scarcity to capability: Empowering
+fake news detection in low-resource languages with LLMs,'' in
+\emph{Proc. Conf. Indo NLP (IndoNLP)}, 2025, arXiv:2501.09604.
+
+\bibitem{mmcfnd} S. Bansal, N. S. Singh, S. S. Dar, and N. Kumar,
+``MMCFND: Multimodal multilingual caption-aware fake news detection for
+low-resource Indic languages,'' 2024, arXiv:2410.10407.
+
+\bibitem{eann} Y. Wang \emph{et al.}, ``EANN: Event adversarial neural
+networks for multi-modal fake news detection,'' in \emph{Proc. 24th ACM
+SIGKDD Int. Conf. Knowl. Discovery Data Mining}, 2018, pp. 849--857.
+
+\bibitem{mvae} D. Khattar, J. S. Goud, M. Gupta, and V. Varma,
+``MVAE: Multimodal variational autoencoder for fake news detection,'' in
+\emph{Proc. World Wide Web Conf. (WWW)}, San Francisco, CA, 2019,
+pp. 2915--2921.
+
+\bibitem{spotfake} S. Singhal, R. R. Shah, T. Chakraborty, P. Kumaraguru, and
+S. Satoh, ``SpotFake: A multi-modal framework for fake news detection,'' in
+\emph{Proc. IEEE 5th Int. Conf. Multimedia Big Data (BigMM)}, Singapore, 2019,
+pp. 39--47.
+
+\bibitem{defame} T. Braun, M. Rothermel, M. Rohrbach, and A. Rohrbach,
+``DEFAME: Dynamic evidence-based fact-checking with multimodal experts,''
+2024, arXiv:2412.10510.
+
+\bibitem{ragar} M. A. Khaliq, P. Chang, M. Ma, B. Pflugfelder, and
+F. Mileti\'{c}, ``RAGAR, your falsehood radar: RAG-augmented reasoning for
+political fact-checking using multimodal large language models,'' in
+\emph{Proc. 7th FEVER Workshop, ACL}, 2024, arXiv:2404.12065.
+
+% TODO(reviewer-6, BLOCKING): confirm the RAMA author list from the arXiv
+% record; it could not be independently verified.
+\bibitem{rama} ``RAMA: Retrieval-augmented multi-agent framework for
+misinformation detection in multimodal fact-checking,'' 2025,
+arXiv:2507.09174.
+\ifdraftnotes\\\emph{\footnotesize [DRAFT NOTE -- REMOVE BEFORE SUBMISSION]
+Author list not independently confirmed; verify against the arXiv record.}\fi
+
+\bibitem{calm} I.-H. Hsu \emph{et al.}, ``CaLM: Contrasting large and small
+language models to verify grounded generation,'' in \emph{Findings Assoc.
+Comput. Linguistics: ACL 2024}, arXiv:2406.05365.
+
+\bibitem{mmfusionnet} J. He, T. Liu, J. Zhao, and B. Turner,
+``MMFusionNet: Context-aware dynamic fusion for multi-modal fake news
+detection with large vision-language models,'' 2025, arXiv:2508.05684.
+
+\bibitem{claaf} G. Mu, C. Chen, X. Li, Y. Chen, J. Dai, and J. Li,
+``CLAAF: Multimodal fake information detection based on contrastive learning
+and adaptive agg-modality fusion,'' \emph{PLOS ONE}, May 2025.
+
+\bibitem{clipood} Y. Shu, X. Guo, J. Wu, X. Wang, J. Wang, and M. Long,
+``CLIPood: Generalizing CLIP to out-of-distributions,'' in \emph{Proc. 40th
+Int. Conf. Machine Learning (ICML)}, 2023, arXiv:2302.00864.
+
+\bibitem{dpod} A. Bhattacharya, D. Brahma, S. Nagaje, A. Asati, V. Verma, and
+S. Biswas, ``Can out-of-domain data help to learn domain-specific prompts for
+multimodal misinformation detection?'' in \emph{Proc. IEEE/CVF Winter Conf.
+Appl. Comput. Vis. (WACV)}, 2025, arXiv:2311.16496.
+
+\bibitem{ragmetrics} S. Roychowdhury, S. Soman, H. G. Ranjani, N. Gunda,
+V. Chhabra, and S. K. Bala, ``Evaluation of RAG metrics for question answering
+in the telecom domain,'' in \emph{ICML 2024 Workshop on Foundation Models in
+the Wild}, 2024, arXiv:2407.12873.
+
+\bibitem{ragprobe} S. Sivasothy, S. Barnett, S. Kurniawan, Z. Rasool, and
+R. Vasa, ``RAGProbe: An automated approach for evaluating RAG applications,''
+2024, arXiv:2409.19019.
+
+\end{thebibliography}
+
+%==============================================================
+% TRIM CANDIDATES -- to reach the ICCIT 6-page limit, remove in roughly this
+% order (least damaging first):
+%
+%  1. Fig. 2 (fig1_ablation)        -- Table I has the same numbers
+%  2. Fig. 6 (fig5_baselines)       -- Table IV has the same numbers
+%  3. Sec. IV-G "Key Observations"  -- repeats IV-A / IV-C
+%  4. Sec. V-C "Addressing the Research Problems" -- repeats Sec. I
+%  5. Sec. I-A "Research Problems" bullets -> compress to 3 sentences
+%  6. Sec. II's four "critical limitations" bullets -> one paragraph
+%  7. Sec. IV-B "Final Configuration Evaluation" -> merge into IV-A
+%  8. Sec. V-D "Verification Layer Reliability" -> merge into III-E Scope
+%  9. Sec. IV-H "Verification Layer Behaviour" -> merge into III-E Scope
+% 10. Sec. V-A paragraph 2 (CISF explanation)
+% 11. Table I rows "Caption only" and "Text only"
+% 12. CCS Concepts block (no IEEE equivalent anyway)
+%
+% Keep at all costs: Sec. III-B partitioning, Sec. III-D threshold selection,
+% Table II with its CI footnote, the retraction paragraph in Sec. IV-C, the
+% duplicate-verification disclosure, Sec. III-E Scope, and the per-class
+% metric columns. Those are the reviewer fixes.
+%
+% Fig. 3 (threshold sweep) and Fig. 5 (confusion matrices) should survive
+% trimming: they are the evidence for the leak-free protocol and for the
+% calibration-versus-representation argument.
+%==============================================================
+
+\end{document}

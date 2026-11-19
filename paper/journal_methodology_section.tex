@@ -1,0 +1,243 @@
+%==============================================================
+% METHODOLOGY SECTION -- journal version.
+%
+% Rewritten against the conference version to add what the new results
+% required: the image normalisation that removes the storage artefact, the
+% article-level screen, the enlarged sealed partition, and the multi-seed
+% threshold-free protocol.
+%
+% Labels defined here and referenced by the Results section:
+%   sec:scope  sec:data  sec:normalise  sec:dedup  sec:articles
+%   sec:partition  sec:features  sec:fusion(*)  sec:training
+% (*) sec:fusion lives in the Results section; it is referenced from here.
+%
+% Verified facts, traceable to files in the project root:
+%   split composition, article ids   BanFakeMM CSVs; doi:10.17632/3r9s7wfbh5.1
+%   screening counts                 duplicate_clusters.csv, dedup_summary.txt
+%   enlarged partition               big_sealed_results_v2.csv (n=1308)
+%   article overlap                  article_screen.csv (86 of 1308)
+%   seeds and statistics             adaptation_final_seeds.csv
+%==============================================================
+
+\section{Methodology}
+
+\subsection{System Architecture and Scope}
+\label{sec:scope}
+
+\sysname{} scores an uploaded image from its visual and captioned content
+alone. Three representations are extracted---a BLIP caption encoded by
+multilingual SBERT and refined through Cross-Image Semantic Fusion (CISF), a
+CLIP visual embedding, and TF-IDF features over the caption---and the
+concatenated vector is classified by a gradient-boosted tree
+(Fig.~\ref{fig:arch}). Section~\ref{sec:fusion} shows the caption pathway earns
+nothing, so the configuration we recommend is the CLIP branch alone; the full
+pipeline is described because it is what the ablation evaluates. A
+retrieval-augmented verification stage exists in the implementation but is not
+evaluated here.
+
+One property of this design governs everything that follows: the system is
+image-derived end to end. The BLIP caption, the OCR text and the CLIP embedding
+are all read off the image, and the article's own title and body---which the
+benchmark distributes---are never an input. The system is therefore well posed
+only where the manipulation reaches the pixels. Section~\ref{sec:detectable}
+establishes which of the benchmark's attack types satisfy that condition, and
+we scope the evaluation to those.
+
+\subsection{Benchmark and Attack Types}
+\label{sec:data}
+
+We use BanFakeMM \cite{banfakemm}, a detector-guided multimodal Bangla
+benchmark built from 7{,}040 authentic news articles with images, drawn from
+eight Bangla newspapers across eleven topical categories. The release provides
+five adversarial sets---AdversarialEdit, AdversarialGen, LinguisticAttack,
+RandomSwap and SemanticSwap---each containing 1{,}000 authentic and 1{,}000
+manipulated samples, so every split is balanced by construction. Each record
+carries an \texttt{article\_id}, a \texttt{source\_dataset} and a category, and
+in the released master file 1{,}863 article identifiers carry both an authentic
+image and its manipulated counterparts. Provenance is published, and we use it
+rather than infer it (Section~\ref{sec:articles}).
+
+Labels are deterministic: a sample is manipulated if the benchmark's
+construction pipeline produced it, not if an annotator judged it so. That makes
+the labels reproducible and the task well defined, but it also means a model
+may learn to recognise the construction pipeline rather than the manipulation.
+Section~\ref{sec:normalise} removes the part of that signature which lives
+outside the image content; the part that survives resampling we cannot separate
+from the manipulation itself, and we say so where it matters.
+
+The classifier is trained on AdversarialEdit and evaluated under shift on
+AdversarialGen. The three remaining splits manipulate article text and leave
+the photograph untouched, which makes them undecidable for an image-only model
+though presumably well posed for one that also reads the text;
+Section~\ref{sec:detectable} demonstrates this rather than assuming it, and
+reports what a model does on them.
+
+\subsection{Image Normalisation}
+\label{sec:normalise}
+
+Before any feature is extracted, every image passes through one identical
+re-encoding: resized to $384 \times 384$ with Lanczos resampling, converted to
+RGB, saved as JPEG at quality 90, with no EXIF block carried over. Resolution,
+aspect ratio, file format, colour mode and EXIF are therefore constant across
+classes; image content is preserved.
+
+This is not cosmetic. In AdversarialEdit all 1{,}000 manipulated images are
+$1408 \times 768$ while the authentic images span many resolutions and formats,
+and a classifier given only that metadata---no pixels at all---separates the
+classes perfectly (Section~\ref{sec:artefact}). Without normalisation, any
+reported accuracy is unidentifiable: it may be reading content, or it may be
+reading the file header. We report the normalised figures as the primary
+results and, where a comparison with the uncontrolled setting is informative,
+give both and label them.
+
+\subsection{Contamination Screening}
+\label{sec:dedup}
+
+\subsubsection{Image-level}
+Filename comparison is not sufficient, since a manipulated image is an edited
+copy of an authentic one and the two can carry unrelated names. Every image the
+study uses is screened by content instead. Each is reduced to a 64-bit DCT
+perceptual hash (pHash), a 64-bit difference hash (dHash) and its CLIP
+embedding; a pair is a near-duplicate when either Hamming distance is at most
+$2$ or the CLIP cosine similarity is at least $0.98$, and pairs are merged with
+union-find. These thresholds sit in a clear gap: of 3.5 million candidate
+pairs, 94 lie at pHash distance $0$ and only 102 at distance $6$ or below.
+Duplicates are near-exact, and looser settings chain unrelated images into
+implausible clusters.
+
+Screening is applied in both directions that matter: within the training split,
+to build cross-validation groups, and from every evaluation partition against
+everything the models have seen---the base training set together with the
+adaptation set.
+
+\subsubsection{Article-level}
+\label{sec:articles}
+An image screen removes repeated pictures, not repeated stories: two different
+photographs of the same event share entities, scene and caption vocabulary, and
+different pixels do not rule that out. Because every image in this benchmark is
+named by its source article, the check is exact rather than inferred---the
+filename stem is the \texttt{article\_id} in each distributed set, which we
+verified by content hash against the released master file.
+
+We therefore report article-level overlap alongside the image-level screen
+rather than folding one into the other, and we state the screening claim
+accordingly: the pipeline removes image duplicates, and measures the residual
+article overlap. Section~\ref{sec:articlescreen} gives the measured effect on
+the conclusions.
+
+\subsection{Partitioning}
+\label{sec:partition}
+
+AdversarialEdit supplies the training corpus: 2{,}000 images, which the
+image-level screen resolves into 1{,}980 groups. Every fold in
+Section~\ref{sec:ablation} is built with \texttt{StratifiedGroupKFold} over
+those groups and asserted group-disjoint at run time.
+
+AdversarialGen supplies the shift evaluation. Setting aside its distributed
+80/10/10 partition, whose proportions do not suit a three-way adaptation study,
+we repartition its 2{,}000 images at a fixed seed: 300 for supervised
+adaptation, 150 for decision-threshold selection, 200 forming the sealed
+partition used by earlier work on this system, and 1{,}350 held back entirely.
+The adaptation and validation partitions are screened against the training set,
+leaving 148 validation images; the adaptation partition keeps all 300, since a
+duplicate inside training data is redundancy rather than leakage and pruning it
+would confound the adaptation contrast with a change in training-set size.
+
+The primary sealed partition is the block of 1{,}350 images, which entered no
+training, tuning or threshold-selection step of any kind and had never been
+scored. Screened against the base training set and the adaptation set under the
+full criteria above---42 images removed, 21 by pHash, 40 by dHash and 24 by
+CLIP cosine---it retains \textbf{1{,}308 images}, 658 of them manipulated. The
+older 200-image block, which screening reduces to 194, has been scored before
+and is therefore no longer pristine; we use it only where a direct comparison
+with the earlier measurement is the point, and label it as such.
+
+\subsection{Features and Classifier}
+\label{sec:features}
+
+A BLIP model generates a caption per image; OCR was evaluated during ablation
+and removed (Section~\ref{sec:ablation}). The caption is tokenized and stemmed,
+with separate handling for Bangla and Latin script, for TF-IDF features, and
+separately encoded by multilingual SBERT. That embedding is refined through
+CISF: combined with the weighted average of its $k=5$ nearest training
+neighbours at fusion weight $\alpha=0.65$, re-normalized, and reduced to 32
+principal components. A CLIP vision encoder
+(\texttt{openai/clip-vit-base-patch32}) independently produces a
+512-dimensional embedding, $L_2$-normalised and reduced to 64 components. These
+were fixed design choices rather than outcomes of a search; a sensitivity study
+over $k$ and $\alpha$, and comparison against adaptive fusion
+\cite{mmfusionnet,claaf}, is left for future work.
+
+The full vector concatenates four blocks, each fit only on the training fold:
+the CISF caption embedding, the CLIP embedding, TF-IDF over the caption
+($1$--$2$ grams, vocabulary capped at 5{,}000, minimum document frequency 3),
+and auxiliary numeric features. Each training embedding's neighbour search
+excludes itself, and at inference an unseen embedding is compared only against
+this fixed training-set reference. Classification uses XGBoost
+(\texttt{max\_depth}~3, \texttt{learning\_rate}~0.0742,
+\texttt{n\_estimators}~443, \texttt{subsample}~0.866,
+\texttt{colsample\_bytree}~0.683, \texttt{min\_child\_weight}~2,
+\texttt{gamma}~0.143, \texttt{reg\_alpha}~$1.01\times10^{-5}$,
+\texttt{reg\_lambda}~4.911), selected by randomized search over 8 sampled
+configurations under 3-fold cross-validation.
+
+\subsection{Protocol, Thresholds and Statistics}
+\label{sec:training}
+
+\subsubsection{Thresholds}
+The operating threshold is selected on held-out validation data, never on an
+evaluation partition, under a rule fixed before the sweep was run: $\tau$
+maximizes fake-class F1 on the screened 148-image validation partition over a
+$0.01$-step grid, ties broken by the median of the tied run. The sealed
+partition is then scored once per threshold, after all training and threshold
+decisions are frozen. Thresholds are selected separately for the normalised and
+unnormalised settings, since the two produce differently calibrated scores, and
+neither is reselected on test data.
+
+Same-distribution figures are computed at the conventional $\tau = 0.50$
+cut-off; no threshold search is performed on the training split, so those
+numbers carry no selection effect.
+
+\subsubsection{Cross-validation and dependence}
+Ablation results come from repeated stratified 5-fold grouped cross-validation
+over the clusters of Section~\ref{sec:dedup}---two repeats, ten folds---with
+identical splits and fixed hyperparameters across every configuration and all
+transforms fit inside the training fold only.
+
+Repeated cross-validation does not yield independent observations: each image
+is held out once per repeat, and any two training folds overlap in four fifths
+of their rows. We therefore never stack repeats. Out-of-fold probabilities are
+averaged across repeats so that each image contributes exactly one prediction
+to any paired test, and fold-level comparisons use the Nadeau--Bengio corrected
+resampled $t$ interval, which adds the train/test overlap ratio
+($n_{\text{test}}/n_{\text{train}} = 0.25$ at five folds) to the naive $1/J$
+variance term---a $3.5\times$ inflation here. The $\pm$ values reported beside
+cross-validated accuracies are the spread across folds, not standard errors,
+and no significance claim rests on them.
+
+\subsubsection{Metrics and uncertainty}
+Results are reported as accuracy, precision, recall and F1 for the manipulated
+class, with authentic-class recall added under shift. Fake-recall is the more
+safety-critical quantity---a missed manipulation circulates unchecked whereas a
+false alarm costs only a review step---which is why the selection rule
+maximizes fake-class F1.
+
+For contrasts between two models on the same sealed partition we report AUROC
+as the primary statistic. It is threshold-free, and the alternative---accuracy
+at a fixed operating point---conflates a change in the model with a change in
+where the cut-off happens to sit; Section~\ref{sec:adaptation} shows the two
+disagreeing in sign on the same data. Confidence intervals on sealed-partition
+quantities come from a paired bootstrap over images with $5{,}000$ resamples;
+paired model comparisons additionally report an exact McNemar test over
+discordant predictions.
+
+\subsubsection{Seeds and reproducibility}
+Every contrast on the sealed partition is run with eight seeds
+($42$, $101$, $202$, $303$, $404$, $505$, $606$, $707$), varying fold
+assignment, the PCA transforms and the classifier together; we report the
+seed-averaged statistic and the seed-to-seed standard deviation, so that the
+size of an effect can be read against the variability of the procedure that
+produced it. Single-seed results are reported nowhere except where we compare
+against an earlier single-seed measurement. All manifests, per-image
+probabilities, screening clusters and the full validation sweeps are released
+with the code.

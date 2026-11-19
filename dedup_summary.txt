@@ -1,0 +1,16 @@
+images analysed: 2650
+criteria: pHash<=2 OR dHash<=2 OR CLIP cosine>=0.98
+linked pairs: 118
+clusters: 2611
+multi-image clusters: 19 covering 58 images
+clusters straddling partitions: 10
+  142: ['base_train', 'gen_adapt'] (2 images)
+  171: ['base_train', 'gen_test'] (2 images)
+  182: ['base_train', 'gen_adapt', 'gen_test'] (13 images)
+  265: ['base_train', 'gen_val'] (3 images)
+  320: ['base_train', 'gen_val'] (2 images)
+  339: ['base_train', 'gen_test'] (2 images)
+  447: ['base_train', 'gen_test'] (2 images)
+  859: ['base_train', 'gen_test'] (3 images)
+  909: ['base_train', 'gen_test'] (2 images)
+  2228: ['base_train', 'gen_adapt'] (8 images)

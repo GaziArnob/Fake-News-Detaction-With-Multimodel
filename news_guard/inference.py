@@ -12,12 +12,21 @@ import pandas as pd
 from .config import Settings
 from .features import ImageFeatureExtractor
 
-# Tuned on the AdversarialGen out-of-distribution test (200 images, no
-# overlap with training): at 0.5 the model missed 27/100 fakes (recall
-# 73%); 0.30 raised accuracy 86.0% -> 90.0% and fake recall to 86%, with
-# only a small real-recall cost (99% -> 94%). See ood_adversarialgen_manifest.csv
-# / independent_test_results.csv for the sweep this was picked from.
-FAKE_DECISION_THRESHOLD = 0.30
+# Selected on the 150-image AdversarialGen VALIDATION partition
+# (adversarialgen_val150_manifest.csv), which is disjoint from both the
+# adaptation-training set and the sealed 200-image test partition. The rule
+# was fixed before the sweep: argmax fake-class F1 over a 0.01 grid, ties
+# broken by the median of the tied run -> 0.21 for this model
+# (multimodal_model.joblib). Sweep: adversarialgen_val150_sweep.csv.
+#
+# Scored once on the sealed test partition at this threshold: 92.0% accuracy,
+# 94% fake-recall, 90% real-recall, against 86.0% / 73% / 99% at the default
+# 0.50 cut-off (adversarialgen_leakfree_results.csv).
+#
+# NOTE: an earlier version of this constant was 0.30, chosen by sweeping the
+# test partition itself. That value is superseded and should not be restored;
+# the numbers it produced (90.0% / 91.5%) were selection artifacts.
+FAKE_DECISION_THRESHOLD = 0.21
 
 
 @dataclass

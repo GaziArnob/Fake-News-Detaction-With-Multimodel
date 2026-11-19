@@ -1,0 +1,529 @@
+%==============================================================
+% RESULTS SECTION -- journal version.
+%
+% Every number below is traceable to a file in the project root:
+%   ablation rows              ablation_grouped_summary.csv
+%   metadata / artefact rows   artefact_control.csv
+%   per-split ceilings         split_ceilings.csv
+%   text-split performance     textsplit_results.csv, textsplit_proof.csv
+%   shift, n=194 controlled    shift_controlled_results.csv
+%   shift, n=1308 both ways    big_sealed_results_v2.csv
+%   adaptation, 8 seeds        adaptation_final.csv, adaptation_final_seeds.csv
+%   article-level screen       article_screen.csv
+%
+% This section SUPERSEDES the conference version's Section IV-C retraction.
+% That retraction rested on an accuracy comparison at one threshold, on 194
+% images, with one seed. Subsection E explains what a better measurement says.
+%==============================================================
+
+\section{Experimental Results}
+
+\subsection{Per-Modality Ablation}
+\label{sec:ablation}
+
+Table~\ref{tab:ablation} reports every configuration under one protocol:
+repeated stratified 5-fold \emph{grouped} cross-validation over the
+near-duplicate clusters of Section~\ref{sec:dedup}, two repeats, identical
+splits and hyperparameters throughout, every transform fit inside the training
+fold only, and all figures taken at the conventional $\tau = 0.50$ cut-off.
+
+OCR in isolation reaches $57.35$ percent with a fake-recall of $33.85$. That is
+above the 50 percent chance baseline---about three fold-standard-deviations
+above it---so the modality is not devoid of signal; but it recovers only a
+third of the manipulated class, and adds nothing once CLIP is present. We
+remove it, and we do not generalize the result beyond this benchmark:
+MultiBanFakeDetect \cite{multibanfake} indicates text-in-image remains a
+meaningful vector for Bangla misinformation, and on a corpus where
+manipulation is carried by embedded text the ordering could invert.
+
+Every text-only configuration saturates below 78 percent while every
+configuration containing CLIP exceeds 95. The gap is not subtle, and
+Section~\ref{sec:detectable} explains it: in this split the manipulation is
+applied to the pixels and to nothing else.
+
+The comparison that matters for placing this work is against
+MultiBanFakeDetect \cite{multibanfake}, the closest prior system in language
+and modality scope. We run its feature families---a DenseNet-169 visual
+backbone, and that backbone fused with an mBERT text branch---through the
+identical pipeline: same folds, same PCA reduction, same classifier, same
+cut-off, so that only the backbone differs. DenseNet-169 reaches
+$89.28 \pm 1.48$ percent against CLIP's $95.38 \pm 1.33$, a gap of $6.10$
+points; with the artefact removed the gap is $6.13$. Adding the mBERT branch
+moves DenseNet to $89.65$, which leaves it $5.73$ points behind CLIP alone.
+
+Two things in that comparison are worth separating. The first is the margin
+itself, which is large and stable across both encodings, and which we would
+expect from a backbone trained contrastively on image--text pairs against one
+trained for ImageNet classification. The second is more informative: the mBERT
+branch contributes $+0.37$ points to DenseNet, and $+0.45$ with the artefact
+removed---the same near-zero contribution the caption pathway makes to CLIP in
+Section~\ref{sec:fusion}. Two independently chosen visual backbones give the
+same verdict on the text branch, which makes that verdict a property of the
+task rather than a quirk of our feature choice.
+
+What this comparison is not is a reimplementation of MultiBanFakeDetect as
+published. That system reads the article's own title and body, which our
+pipeline never takes as input, so its text branch here encodes the BLIP caption
+instead. The comparison therefore isolates the backbone and the fusion
+structure under one protocol; it does not establish how the published system
+would perform with the inputs it was designed for.
+
+No row is marked best among the four CLIP-containing configurations. Their
+total spread is $0.17$ points against a per-fold standard deviation of
+$1.0$--$1.4$, and the ordering reverses under an unrelated methodological
+change---ungrouped folds put CLIP-only ahead by $0.18$ points, duplicate-aware
+folds put the fused configuration ahead by $0.02$. Accuracy does not decide
+between them; Section~\ref{sec:fusion} decides on other grounds.
+
+\begin{table}[!tb]
+\caption{Baselines, Per-Modality Ablation and the Artefact Control Under One
+Protocol: Repeated Stratified 5-Fold \emph{Grouped} Cross-Validation Over
+Near-Duplicate Clusters ($2$ Repeats, $10$ Folds), in Percent.}
+\label{tab:ablation}
+\centering
+\setlength{\tabcolsep}{3.5pt}
+\footnotesize
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Configuration} & \textbf{Acc.} & \textbf{Prec.$_{f}$} &
+\textbf{Rec.$_{f}$} & \textbf{F1$_{f}$} \\
+\midrule
+\multicolumn{5}{l}{\emph{Reference baselines}} \\
+Metadata only (no pixels)$^{\ddagger}$ & 100.00 $\pm$ 0.00 & 100.00 & 100.00 & 100.00 \\
+Linear SVM (TF-IDF)     & 73.93 $\pm$ 1.35 & 72.42 & 77.40 & 74.80 \\
+XGBoost (TF-IDF + num.) & 77.15 $\pm$ 1.86 & 77.50 & 76.60 & 77.00 \\
+DenseNet-169$^{\S}$     & 89.28 $\pm$ 1.48 & 89.10 & 89.50 & 89.30 \\
+\quad artefact-controlled & 88.22 $\pm$ 1.57 & 88.49 & 87.90 & 88.19 \\
+DenseNet-169 + mBERT$^{\S}$ & 89.65 $\pm$ 1.50 & 89.39 & 90.00 & 89.68 \\
+\quad artefact-controlled & 88.67 $\pm$ 1.97 & 88.71 & 88.65 & 88.66 \\
+\midrule
+\multicolumn{5}{l}{\emph{Modality ablation}} \\
+OCR only              & 57.35 $\pm$ 2.34 & 63.97 & 33.85 & 44.22 \\
+Caption only          & 74.50 $\pm$ 2.68 & 75.22 & 73.25 & 74.16 \\
+Text only             & 76.05 $\pm$ 1.82 & 76.42 & 75.45 & 75.87 \\
+Text + CISF           & 77.38 $\pm$ 2.10 & 77.41 & 77.55 & 77.40 \\
+\midrule
+CLIP only$^{\dagger}$ & 95.38 $\pm$ 1.33 & 94.68 & 96.15 & 95.41 \\
+\quad on artefact-controlled images & 94.35 $\pm$ 0.94 & 94.17 & 94.60 & 94.37 \\
+Text + CLIP           & 95.28 $\pm$ 1.04 & 95.04 & 95.55 & 95.28 \\
+CLIP + CISF           & 95.23 $\pm$ 1.38 & 95.07 & 95.40 & 95.23 \\
+Caption + CISF + CLIP & 95.40 $\pm$ 1.09 & 95.13 & 95.70 & 95.41 \\
+\bottomrule
+\multicolumn{5}{p{0.95\columnwidth}}{\footnotesize Subscript $f$ denotes the
+manipulated class; $\pm$ is the spread across folds, not a standard error.
+$^{\dagger}$ the selected configuration, on the grounds of
+Section~\ref{sec:fusion}. $^{\ddagger}$ width, height, area, aspect ratio, file
+size, format and colour mode only, with no image content---see
+Section~\ref{sec:artefact}. $^{\S}$ the feature families of
+MultiBanFakeDetect \cite{multibanfake} run through this protocol; see the text
+for what that comparison does and does not establish.}
+\end{tabular}
+\end{table}
+
+\subsection{Does the Caption Pathway Contribute?}
+\label{sec:fusion}
+
+Accuracy parity does not settle whether the caption pathway is worth keeping: a
+feature block can leave accuracy unchanged yet still improve ranking or
+calibration, neither of which is visible in Table~\ref{tab:ablation}. We
+compare CLIP-only against the fused configuration on four measures in both
+regimes, everything else held fixed.
+
+\begin{table}[!tb]
+\caption{CLIP-Only Versus the Fused Configuration, Same Hyperparameters and
+Folds. AUROC and Brier Are Threshold-Independent; ECE Uses $10$ Bins. Arrows
+Mark the Preferred Direction.}
+\label{tab:fusion}
+\centering
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{llcccc}
+\toprule
+& \textbf{Model} & \textbf{Acc.}$\uparrow$ & \textbf{AUROC}$\uparrow$ &
+\textbf{Brier}$\downarrow$ & \textbf{ECE}$\downarrow$ \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\scriptsize same-d.}}
+& CLIP only & 95.38 & 0.9918 & 0.0349 & 3.17 \\
+& Fused     & 95.40 & 0.9920 & 0.0342 & 3.05 \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\scriptsize shift}}
+& CLIP only & 85.05 & \textbf{0.9759} & \textbf{0.0936} & \textbf{4.06} \\
+& Fused     & 85.57 & 0.9732 & 0.1076 & 7.31 \\
+\bottomrule
+\multicolumn{6}{p{0.94\columnwidth}}{\footnotesize Same-distribution figures
+are pooled out-of-fold values over the folds of Table~\ref{tab:ablation};
+shift figures are the 194-image partition at $\tau = 0.50$, so both models meet
+the same operating point. That partition is easier than the full sealed set:
+CLIP-only reaches AUROC $0.976$ on it and $0.941$ on the 1{,}308-image partition
+(Fig.~\ref{fig:roc}), so the shift rows support the paired comparison between the
+two models, not an absolute level. Both regimes use the original files: see the
+caveat at the end of this subsection.}
+\end{tabular}
+\end{table}
+
+Same-distribution, the two are indistinguishable on every measure. The paired
+fold-level differences (fused minus CLIP-only), with the Nadeau--Bengio
+correction for fold dependence \cite{nadeau}, are $+0.03$ accuracy points
+(95\% CI $[-0.98, +1.03]$, $p = 0.956$), $+0.0002$ AUROC ($p = 0.811$),
+$-0.0006$ Brier ($p = 0.709$) and $-0.12$ ECE points ($p = 0.794$); McNemar on
+the repeat-averaged out-of-fold predictions, one per image, finds 21 images the
+fused model alone classifies correctly against 20 for CLIP-only (exact
+$p = 1.000$). Every interval spans zero, and the uncorrected intervals---which
+we do not report---were $1.9\times$ narrower.
+
+Under shift the comparison turns against the caption pathway. Its
+$+0.5$-point accuracy advantage sits well inside its interval
+($[-2.6, +3.6]$), while its calibration is clearly worse: Brier rises from
+$0.0936$ to $0.1076$ and expected calibration error from $4.06$ to $7.31$
+points---least trustworthy exactly where the threshold has to be chosen. The
+pathway costs a BLIP forward pass, an SBERT encoding and a nearest-neighbour
+search per image and returns nothing measurable, so we do not claim it as a
+contribution and adopt CLIP-only as the recommended configuration.
+
+We repeated the same-distribution comparison under the artefact control of
+Section~\ref{sec:artefact}, regenerating the BLIP captions from the re-encoded
+images, since the caption pathway reads the image and could carry the artefact
+too. With every input taken from the re-encoded files, CLIP-only reaches
+$94.35 \pm 0.99$ percent and the fused configuration $94.68 \pm 1.07$: a
+difference of $+0.33$ points (Nadeau--Bengio 95 percent CI $[-0.51, +1.16]$),
+$-0.0007$ AUROC ($[-0.0023, +0.0008]$), and no difference in Brier score or
+expected calibration error; the out-of-fold McNemar test splits $19$ to $17$
+($p = 0.87$). The verdict is unchanged. What we did not repeat is the
+distribution-shift comparison above, whose calibration gap was measured on the
+original files, so that part remains uncontrolled.
+
+\subsection{Dataset Artefacts and What Survives Them}
+\label{sec:artefact}
+
+An accuracy above 95 percent on a constructed benchmark deserves suspicion
+before it deserves interpretation. In the AdversarialEdit split every one of
+the 1{,}000 manipulated images is $1408 \times 768$, while the authentic images
+are spread across many resolutions, formats and colour modes; AdversarialGen
+carries the same signature in 995 of its 1{,}000 manipulated images. The
+classes are separable without reading a single pixel, and the first row of
+Table~\ref{tab:ablation} confirms it: a classifier given only width, height,
+area, aspect ratio, file size, format and colour mode reaches
+$100.00 \pm 0.00$ percent under the same grouped protocol.
+Figure~\ref{fig:resolution} shows the fingerprint: the manipulated class sits in
+a single column, and the authentic class, spread over 196 distinct sizes in
+AdversarialEdit and 157 in AdversarialGen, never uses it.
+
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=\columnwidth]{fig_j_resolution.png}
+\caption{Resolution fingerprint in the two image-attack splits. Manipulated
+images are $1408 \times 768$ in $100.0$ percent (a) and $99.5$ percent (b) of
+cases; authentic images are spread over many sizes, none of them $1408 \times
+768$. Bars show the share of each class at its five most common sizes, plus the
+manipulated class's modal size.}
+\label{fig:resolution}
+\end{figure}
+
+We therefore re-encode every image through one identical pipeline before
+feature extraction---resized to $384 \times 384$, converted to RGB, saved as
+JPEG at quality 90, EXIF discarded---so that resolution, aspect ratio, format,
+colour mode and EXIF are destroyed while content is preserved. Repeating the
+CLIP-only configuration on the re-encoded corpus, with the same folds,
+hyperparameters and cut-off, gives $94.35 \pm 0.94$ percent against
+$95.38 \pm 1.33$ on the originals: a loss of $1.03$ points. The discriminative
+signal is in the pixels, not in the storage fingerprint.
+
+The shortcut is not a property of the corpus as a whole, and the benchmark
+contains its own control. Table~\ref{tab:shortcut} applies the same
+metadata-only classifier to all five adversarial splits. It separates the
+classes perfectly in exactly the two splits whose manipulated images are
+produced by an image pipeline, and finds nothing in the three that rewrite the
+article text and reuse the photograph: AUROC $1.0000$ against $0.3175$ to
+$0.4892$. The shortcut therefore tracks the attack type rather than the
+benchmark, which is what one would expect if it originates in a generator
+emitting at a fixed resolution.
+
+\begin{table}[!tb]
+\caption{Metadata-Only Classifier Across All Five Adversarial Splits, Same
+Feature Set as Table~\ref{tab:ablation}, 5-Fold Cross-Validation. No Pixel
+Content Is Used.}
+\label{tab:shortcut}
+\centering
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{llcc}
+\toprule
+\textbf{Split} & \textbf{Manipulation} & \textbf{Acc.} & \textbf{AUROC} \\
+\midrule
+AdversarialEdit  & image & 100.00 $\pm$ 0.00 & 1.0000 \\
+AdversarialGen   & image & 99.35 $\pm$ 1.30 & 1.0000 \\
+\midrule
+LinguisticAttack & text  & 48.95 $\pm$ 1.61 & 0.4892 \\
+RandomSwap       & text  & 39.05 $\pm$ 3.87 & 0.3318 \\
+SemanticSwap     & text  & 37.05 $\pm$ 1.54 & 0.3175 \\
+\midrule
+MultiBanFakeDetect$^{\ddagger}$ & fake-labelled & 77.51 $\pm$ 4.55 & 0.8533 \\
+\bottomrule
+\multicolumn{4}{p{0.92\columnwidth}}{\footnotesize Values below chance mean the
+metadata carries no usable signal and is, if anything, mildly misleading---
+consistent with the image reuse across labels documented in
+Section~\ref{sec:detectable}. $^{\ddagger}$A second corpus
+\cite{multibanfake}: 9{,}597 images, label read from the file name, same
+metadata features, plain 5-fold cross-validation.}
+\end{tabular}
+\end{table}
+
+Two limits on what this establishes. Re-encoding removes the storage artefact,
+not a generation-pipeline signature that survives resampling. If every
+manipulated image carries the same synthesis fingerprint, a visual model may be
+recognising the generator rather than the manipulation---and because BanFakeMM
+defines its labels by the construction pipeline, the two are difficult to
+separate even in principle. We report the controlled figure throughout and
+flag, in each table, which numbers are controlled and which are not.
+
+The control of Table~\ref{tab:shortcut} is internal to one benchmark, so we ran
+the same file-metadata classifier on a second Bangla multimodal corpus,
+MultiBanFakeDetect \cite{multibanfake}: 9{,}600 images, half labelled fake,
+with the label read from the file name. The artefact is present there but far
+weaker than in BanFakeMM. Metadata alone reaches $77.5$ percent accuracy
+(AUROC $0.853$) under plain five-fold cross-validation, $82.8$ percent
+(AUROC $0.902$) with byte-identical files grouped, and $77.1$ percent
+(AUROC $0.852$) when trained on the official Train folder and scored on Test,
+against $100$ percent in BanFakeMM's image-attack splits and $50$ percent at
+chance. One size, $728\times410$, accounts for $39.5$ percent of the
+fake-labelled images and for at most $7.2$ percent of any size among the
+authentic ones, and $85$ files occur under both labels. We therefore read the
+shortcut as a property of constructed Bangla benchmarks that varies in
+strength, not as a feature of BanFakeMM alone. Whether the fake-labelled images
+in that corpus are manipulated or merely sourced differently we did not
+verify, and we use ``fake-labelled'' for that reason.
+
+\subsection{Which Attack Types Are Detectable From Pixels}
+\label{sec:detectable}
+
+BanFakeMM provides five adversarial splits. They are not five variations on
+one task. We checked each manipulated image against the benchmark's full
+authentic corpus (the 7{,}040 real images of the released master file) by
+content hash and by perceptual hash; Table~\ref{tab:ceiling} reports the
+result.
+
+In AdversarialEdit and AdversarialGen not one manipulated image reproduces an
+authentic one. In LinguisticAttack, RandomSwap and SemanticSwap \emph{every}
+manipulated image is byte-identical to an authentic image---1{,}000 of 1{,}000,
+at perceptual-hash distance zero. Those attacks alter the article text and
+leave the photograph untouched. An image-only classifier cannot exceed chance
+on them, not because it is weak but because the label is not a function of its
+input.
+
+\begin{table}[!tb]
+\caption{Per-Split Image-Only Ceiling and Measured Performance. The Ceiling Is
+$1$ Minus the Share of Manipulated Images That Reproduce an Authentic Image.
+Measured Figures Are the Zero-Shot CLIP-Only Model at $\tau = 0.50$.}
+\label{tab:ceiling}
+\centering
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Split} & \textbf{Manip.} & \textbf{Reproduced} &
+\textbf{Ceiling} & \textbf{Acc.} & \textbf{AUROC} \\
+\midrule
+AdversarialEdit  & 1000 & 0    & 100\% & --- & --- \\
+AdversarialGen   & 1000 & 0    & 100\% & 85.1 & --- \\
+\midrule
+LinguisticAttack & 1000 & 1000 & 0\%   & 49.5 & 0.4832 \\
+RandomSwap       & 1000 & 1000 & 0\%   & 50.5 & 0.5165 \\
+SemanticSwap     & 1000 & 1000 & 0\%   & 50.5 & 0.5094 \\
+\bottomrule
+\multicolumn{6}{p{0.95\columnwidth}}{\footnotesize ``Reproduced'' counts
+manipulated images byte-identical to an authentic image in the benchmark's
+master file; all of them are also at perceptual-hash distance $0$.
+AdversarialEdit is the training split, so no held-out figure is quoted.}
+\end{tabular}
+\end{table}
+
+The measured numbers match the prediction exactly. Accuracy on the three
+text-attack splits is $49.5$, $50.5$ and $50.5$ percent, and AUROC is
+$0.4832$, $0.5165$ and $0.5094$---indistinguishable from a coin, and
+threshold-independent, so no operating point can rescue them. The signature is
+visible in the structure as well: fake-recall and real-recall sum to almost
+exactly 100 at every threshold we tried, which is what happens when lowering a
+cut-off moves images out of one class and into the other at the same rate in
+both. Figure~\ref{fig:roc} puts the contrast in one picture: on the
+image-attack split the ROC curve climbs steeply, and on the three text-attack
+splits it lies on the diagonal.
+
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=0.95\columnwidth]{fig_j_roc.png}
+\caption{ROC curves of the zero-shot CLIP-only model (seed 42, original files)
+on the image-attack AdversarialGen split (the 1{,}308-image sealed partition)
+and on the three text-attack splits (2{,}000 images each). The text-attack
+curves are indistinguishable from chance because every manipulated image in
+those splits is byte-identical to an authentic one.}
+\label{fig:roc}
+\end{figure}
+
+Two further checks confirm the mechanism rather than merely the outcome. Where
+a split's manipulated image is the same file as one of its own authentic
+images---26, 38 and 131 such pairs respectively---the model assigns the two
+\emph{exactly} the same probability, maximum absolute difference
+$0.00\mathrm{e}{+}00$. And the mean predicted probability of the manipulated
+class ($0.0703$, $0.0678$, $0.0808$) is within noise of the authentic class
+($0.0790$, $0.0616$, $0.0739$). The 50 percent is arithmetic, not a deficiency.
+
+The consequence for this paper is a scope statement rather than a result: our
+system is image-derived end to end---BLIP caption, OCR and CLIP all read the
+image, and the article's own text is never an input---so it is well posed on
+two of the five splits and we evaluate it on those two only. The consequence
+for the field is sharper: any image-level result reported across all five
+BanFakeMM splits is averaging over three conditions in which the task is
+undefined.
+
+\subsection{Performance Under Distribution Shift}
+\label{sec:shift}
+
+Shift is measured from AdversarialEdit to AdversarialGen, the two splits
+Section~\ref{sec:detectable} shows to be well posed. Thresholds are selected on
+the disjoint 148-image validation partition under the rule fixed in
+Section~\ref{sec:training} and are not reselected afterwards; the sealed
+partition is scored once per threshold.
+
+We enlarge the sealed partition well beyond the conference version. The 1{,}350
+AdversarialGen images the study had never touched---not training, not
+adaptation, not threshold selection---are screened against everything the
+models have seen (base training plus the adaptation set) under the full
+criteria of Section~\ref{sec:dedup}: perceptual-hash distance at most 2 on
+either hash, or CLIP cosine at least $0.98$. That removes 42 images
+(21 by pHash, 40 by dHash, 24 by CLIP cosine; 42 in union) and leaves
+\textbf{1{,}308 sealed images}, 658 of them manipulated---$6.7\times$ the
+194-image partition the conference version used.
+
+\begin{table}[!tb]
+\caption{Distribution Shift on the 1{,}308-Image Sealed Partition, Scored Once
+Per Threshold, With and Without the Artefact Control. All Values in Percent.}
+\label{tab:shift}
+\centering
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{tabular}{llccccc}
+\toprule
+& \textbf{Setting} & \textbf{$\tau$} & \textbf{Acc.} &
+\textbf{Prec.$_{f}$} & \textbf{Rec.$_{f}$} & \textbf{Rec.$_{r}$} \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\scriptsize raw}}
+& Zero-shot & 0.09 & 87.2 & 83.1 & 93.5 & 80.8 \\
+& Adapted   & 0.12 & 87.8 & 82.0 & 97.1 & 78.5 \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\scriptsize ctrl.}}
+& Zero-shot & 0.25 & 84.9 & 86.6 & 82.7 & 87.1 \\
+& Adapted   & 0.35 & 88.7 & 89.1 & 88.3 & 89.1 \\
+\bottomrule
+\multicolumn{7}{p{0.95\columnwidth}}{\footnotesize ``raw'' uses the original
+files and carries the artefact of Section~\ref{sec:artefact}; ``ctrl.'' uses
+re-encoded images. Bootstrap 95\% CIs on accuracy (5{,}000 resamples), in row
+order: $[85.3, 88.9]$, $[86.0, 89.6]$, $[82.9, 86.9]$, $[86.9, 90.4]$.}
+\end{tabular}
+\end{table}
+
+Two things change under the control, and both matter. The selected thresholds
+move from $0.09$ and $0.12$ to $0.25$ and $0.35$: on re-encoded images the
+model is far better calibrated and no longer needs an extreme cut-off. And the
+apparent benefit of thresholding collapses. On the 194-image partition,
+re-encoded, moving from the default cut-off to the validation-selected one
+bought $+0.5$ points ($87.6 \rightarrow 88.1$, 95 percent CI
+$[-3.6, +4.6]$, McNemar $p = 1.000$), where the uncontrolled measurement had
+suggested $+6.1$. \emph{We therefore withdraw the claim, made in the
+conference version of this work, that almost the entire shift penalty is a
+calibration effect.} It was largely an artefact of the uncontrolled encoding.
+
+\subsection{Does Supervised Adaptation Help?}
+\label{sec:adaptation}
+
+The conference version of this work retracted a previously claimed adaptation
+gain, on the basis that 300 additional target-style images changed sealed-test
+accuracy by $-1.5$ points (95 percent CI $[-4.6, +1.5]$ as reported there; a
+bootstrap run to convergence on the same per-image scores gives
+$[-5.2, +1.5]$, which is the interval drawn in Fig.~\ref{fig:adaptation}). That
+measurement was an accuracy comparison at one fixed threshold, on 194 images,
+from a single model fit. It is the most fragile way to measure this effect, and
+Table~\ref{tab:adaptation} and Fig.~\ref{fig:adaptation} show it was measuring
+the wrong thing.
+
+\begin{table}[!tb]
+\caption{Effect of Supervised Adaptation on the 1{,}308-Image Sealed
+Partition, Averaged Over Eight Seeds. $\Delta$AUROC Is Threshold-Free; CIs Are
+Paired Bootstraps Over Images ($5{,}000$ Resamples).}
+\label{tab:adaptation}
+\centering
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Setting} & \textbf{AUROC$_{0}$} & \textbf{AUROC$_{a}$} &
+\textbf{$\Delta$AUROC} & \textbf{95\% CI} & \textbf{$\Delta$Acc.} \\
+\midrule
+Raw        & 0.9422 & 0.9661 & $+0.0240$ & $[+0.0173, +0.0308]$ & $+1.40 \pm 0.69$ \\
+Controlled & 0.9380 & 0.9652 & $+0.0273$ & $[+0.0205, +0.0344]$ & $+4.04 \pm 0.43$ \\
+\midrule
+\multicolumn{6}{l}{\emph{Article-disjoint subset ($n = 1{,}222$)}} \\
+Raw        & 0.9432 & 0.9660 & $+0.0228$ & $[+0.0160, +0.0301]$ & $+1.61 \pm 0.76$ \\
+Controlled & 0.9386 & 0.9655 & $+0.0270$ & $[+0.0202, +0.0343]$ & $+4.15 \pm 0.52$ \\
+\bottomrule
+\multicolumn{6}{p{0.95\columnwidth}}{\footnotesize Subscripts $0$ and $a$
+denote the zero-shot and adapted models. $\Delta$Acc. is at the fixed
+validation-selected thresholds of Table~\ref{tab:shift}, reported as mean
+$\pm$ standard deviation across seeds. Seed-to-seed standard deviation of
+$\Delta$AUROC is $0.0018$ (raw) and $0.0017$ (controlled). All four rows use the
+same eight seeds, the same training-row order and the same definition of
+$\Delta$Acc.}
+\end{tabular}
+\end{table}
+
+\begin{figure*}[!tb]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_j_adaptation.png}
+\caption{The same intervention measured four ways. (a) Accuracy gain from
+adaptation at a fixed threshold, each bar a single fit (seed 42) with a 95
+percent bootstrap interval over images: it is negative on the 194-image
+partition, indistinguishable from zero on 1{,}308 original files, and positive
+on 1{,}308 artefact-controlled images; the eight-seed means are in
+Table~\ref{tab:adaptation}. (b) The
+threshold-free AUROC gain, with 95 percent intervals, is positive and similar in
+both settings. (c) Per-seed AUROC before and after adaptation: it improves in
+all 16 runs (eight seeds, two settings).}
+\label{fig:adaptation}
+\end{figure*}
+
+Measured threshold-free, supervised adaptation improves the ranking by
+$+0.0240$ AUROC on the original files and $+0.0273$ on re-encoded ones. Both
+confidence intervals exclude zero by a wide margin, and the seed-to-seed
+standard deviation---$0.0018$ and $0.0017$---is roughly one fourteenth of the
+effect. The result does not depend on the artefact control: it is present, at
+almost the same size, with and without it.
+
+Accuracy at a fixed threshold is the unreliable view of the same thing. It
+ranges from $+1.40 \pm 0.69$ points to $+4.04 \pm 0.43$ depending only on which
+encoding and which operating point one happens to be standing at, and on 194
+images with one seed it came out negative. The seed behind the conference
+version's single fit (42) gave $+0.7$ on the 1{,}308 original files, the
+second-lowest of the eight raw runs, which span $+0.2$ to $+2.6$.
+
+\emph{We therefore reverse the retraction.} Supervised adaptation on 300
+target-style images does improve the model, by about $0.025$ AUROC. What the
+earlier result established is narrower and still true: the gain is not
+reliably visible in accuracy at a fixed operating point, and a study powered
+only to detect several points of accuracy will miss it.
+
+\subsection{Article-Level Overlap}
+\label{sec:articlescreen}
+
+The screen of Section~\ref{sec:dedup} removes repeated pictures, not repeated
+stories. Because every image in this benchmark is named by its source article,
+the stronger check is exact: 86 of the 1{,}308 sealed images ($6.6$ percent)
+share a source article with a training image. All 86 are authentic;
+\emph{none} of the 658 manipulated images does, because AdversarialGen
+generates its manipulated images under fresh article identifiers while drawing
+its authentic images from the same corpus the training split uses.
+
+Restricting to the 1{,}222 article-disjoint images leaves the conclusions
+unchanged, as the lower block of Table~\ref{tab:adaptation} shows:
+$\Delta$AUROC moves by $0.0012$ (raw) and $0.0003$ (controlled), both far
+inside their confidence intervals, and $\Delta$accuracy by $0.2$ and $0.1$
+points, within one seed standard deviation. We report the figure on the full
+sealed partition and note that article-level screening does not alter it.

@@ -1,0 +1,5 @@
+mode,subset,n,seeds,auroc_zeroshot,auroc_adapted,d_auroc,ci_lo,ci_hi,d_acc_mean,d_acc_sd
+raw,all sealed images,1308,8,0.9422,0.9661,0.024,0.0173,0.0308,1.4,0.69
+raw,article-disjoint only,1222,8,0.9432,0.966,0.0228,0.016,0.0301,1.61,0.76
+controlled,all sealed images,1308,8,0.938,0.9652,0.0273,0.0207,0.0344,4.04,0.43
+controlled,article-disjoint only,1222,8,0.9386,0.9655,0.027,0.0202,0.0343,4.15,0.52

@@ -1,0 +1,6 @@
+split,n_fake,exact,phash_le2,phash_le6,ceiling_pct
+AdversarialEdit (train),1000,0,0,0,100.0
+AdversarialGen,1000,0,0,0,100.0
+LinguisticAttack,1000,1000,1000,1000,0.0
+RandomSwap,1000,1000,1000,1000,0.0
+SemanticSwap,1000,1000,1000,1000,0.0

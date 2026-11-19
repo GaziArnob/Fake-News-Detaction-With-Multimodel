@@ -1,0 +1,5 @@
+configuration,acc,std,prec_f,rec_f,f1_f
+DenseNet-169 (raw images),89.28,1.48,89.1,89.5,89.3
+DenseNet-169 (artefact-controlled),88.22,1.57,88.49,87.9,88.19
+DenseNet-169 + mBERT (raw),89.65,1.5,89.39,90.0,89.68
+DenseNet-169 + mBERT (controlled),88.67,1.97,88.71,88.65,88.66

@@ -1,0 +1,200 @@
+%==============================================================
+% DISCUSSION + CONCLUSION -- journal version.
+%
+% Defines sec:limitations, referenced from the Related Work section.
+%
+% The shift interpretation here is the OPPOSITE of the conference version's.
+% That version argued the shift penalty was mostly a calibration effect; the
+% artefact control shows that was an artefact of the uncontrolled encoding
+% (Section IV-D), and the behaviour of the two interventions points the other
+% way. Section A below gives the reasoning and the numbers behind it.
+%==============================================================
+
+\section{Discussion}
+
+\subsection{One Benchmark, Two Tasks}
+\label{sec:twotasks}
+
+The per-split decomposition is the result with consequences beyond this
+system. BanFakeMM distributes five adversarial sets under one name and one
+labelling convention, and it is natural to read them as five difficulty levels
+of a single task. They are not. Two of them edit or synthesise the photograph;
+the other three rewrite the article and ship the original photograph unchanged,
+byte for byte. This is, we presume, by design: attacks that alter the text and
+keep the photograph are the natural way to build cross-modal inconsistency, and
+they are well posed for a detector that reads both. The point is therefore not
+that the benchmark is flawed but that an image-only evaluation falls outside its
+intended use on those splits. A model reading only pixels is answering a
+different question in each group, and in the second group it is answering a
+question whose answer is absent from its input.
+
+This matters because the failure is silent. The model does not crash or abstain
+on LinguisticAttack; it returns $49.5$ percent accuracy, which looks like a
+weak result rather than an undefined one. An author who reports an image-model
+average across all five splits produces a number that is two parts measurement
+and three parts noise, and nothing in the accuracy figure reveals the
+difference. The check that does reveal it is cheap---hash the manipulated
+images against the authentic corpus---and we would argue it belongs in the
+reporting of any multi-attack benchmark, alongside the split sizes.
+
+For this system the consequence is a scope statement. \sysname{} is
+image-derived throughout, so we evaluate it where the image carries the
+manipulation and say plainly that it is blind elsewhere. A detector that
+covered the other three attacks would need the article text as an input, which
+the benchmark distributes and which our pipeline does not read. That is the
+clearest direction for extending this work, and it is a different system rather
+than a tuning of this one.
+
+\subsection{Where the Shift Penalty Actually Lives}
+\label{sec:shiftdiscussion}
+
+Under the artefact control, the zero-shot model falls from $94.35$ percent
+same-distribution to $84.9$ on the sealed shift partition. Two interventions
+are available, and they behave very differently.
+
+Moving the operating point---selecting a threshold on a disjoint validation
+partition instead of using the default---buys $+0.5$ points
+(95 percent CI $[-3.6, +4.6]$, McNemar $p = 1.000$). Changing the model, by
+adding 300 target-style training images, buys $+3.8$ accuracy points and
+$+0.027$ AUROC, with intervals excluding zero across eight seeds. A threshold
+move cannot change a ranking; adaptation can, and did. The shift penalty is
+therefore predominantly representational: the zero-shot model does not merely
+place its cut-off badly, it orders the target-style images less well, and only
+retraining repairs that.
+
+\emph{This reverses the interpretation we published in the conference version
+of this work}, which attributed almost the entire shift penalty to calibration.
+That conclusion rested on an uncontrolled measurement in which thresholding
+appeared to recover $+6.1$ points. Once the storage artefact is removed, the
+same comparison yields $+0.5$. The artefact had inflated the apparent value of
+recalibration because it gave the zero-shot model a spurious, well-separated
+signal whose decision boundary was simply mis-placed---exactly the situation in
+which moving a threshold looks powerful.
+
+We note the boundary of the shift being studied. AdversarialEdit and
+AdversarialGen differ in how the manipulated class is produced, not in image
+source or capture conditions, and both draw their authentic images from the
+same corpus. A shift that also changed provenance or compression could damage
+the representation further, and nothing here bounds that case.
+
+\subsection{What a Fixed Threshold Hides}
+\label{sec:metricdiscussion}
+
+The adaptation result is a methodological warning as much as an empirical one.
+The same intervention, measured on the same images, reads as $-1.5$ points on
+194 images, $+0.7$ or $+3.8$ points on 1{,}308 images from a single fit
+(original or re-encoded), or $+1.4$ and $+4.0$ points averaged over eight
+seeds, depending on the partition size, the encoding, the seed and the operating
+point---and as a stable $+0.023$ to $+0.027$ AUROC regardless of any of them. Accuracy at a fixed threshold is a projection
+of a model's behaviour onto one point of its ROC curve, and an intervention
+that improves the curve elsewhere is invisible to it.
+
+This is not an argument against reporting accuracy, which is what a deployed
+system delivers. It is an argument against using accuracy at a single
+threshold, on a small partition, from a single fit, to support a \emph{null}.
+A null claim asserts that an effect is absent; to carry that weight the
+measurement must be sensitive enough to have found the effect had it been
+there. The conference version's interval, $[-4.6, +1.5]$ (converged: $[-5.2,
++1.5]$), was wide enough to
+contain the $+1.4$ we later measured on $6.7\times$ more data. The honest
+reading at the time would have been that the study could not resolve the
+question, which is the reading we now recommend for any accuracy-based null on
+a partition of that size.
+
+\subsection{Limitations and Future Directions}
+\label{sec:limitations}
+
+Ground-truth labels derive from BanFakeMM's deterministic construction, so the
+demonstrated competence is specific to detecting algorithmic manipulation, not
+to adjudicating whether a news item's claim is true. Establishing that a
+photograph was edited says nothing about the story attached to it.
+
+Our normalisation removes the storage artefact but not a generation-pipeline
+signature that survives resampling. If every manipulated image carries the same
+synthesis fingerprint, a visual model may be recognising the generator rather
+than the manipulation, and a benchmark that defines its labels by the
+construction pipeline cannot distinguish the two. Settling this needs
+manipulated images from several independent generators, which BanFakeMM does
+not provide.
+
+The shift evaluation, though sealed, screened at both the image and article
+level, and artefact-controlled, draws on a second split of the same benchmark.
+The metadata check of Section~\ref{sec:artefact} was repeated on one other
+corpus, but the detector itself was not.
+Generalization to manipulation styles and image sources outside BanFakeMM,
+including organically collected social media imagery, remains open and is the
+limitation we would most like to remove.
+
+Two limits remain on the caption-pathway comparison. Under the artefact control
+it was repeated only for the same-distribution setting
+(Section~\ref{sec:fusion}); the shift-partition comparison, where the fused
+model's calibration deficit appeared, was not, because it would need captions for
+the shift images as well. And the CISF hyperparameters $k$ and $\alpha$ were fixed
+by design rather than search; a post hoc grid over $k \in \{3, 5, 10\}$ and
+$\alpha \in \{0.5, 0.65, 0.8\}$ moves fused accuracy only between $94.30$ and
+$94.68$ percent, well inside the $1.0$ to $1.3$ point fold-to-fold spread, so the
+choice does not drive any conclusion here.
+
+Our comparison against MultiBanFakeDetect \cite{multibanfake} is of feature
+families under one protocol, not of trained systems: its text branch consumes
+the article's own content, which this pipeline does not read. A comparison that
+gave both systems the inputs they were designed for would be more informative
+than either, and would also reach the three attack types we are blind to.
+
+Finally, pairing this detector with retrieval over a Bangla fact-check corpus
+is the obvious extension, and the one that would address the three attack types
+we are blind to. Evaluating such a stage needs a labelled claim set with
+adjudicated verdicts, retrieval recall@$k$ against gold evidence, and an
+abstention analysis. A preliminary measurement suggests it is harder than it
+looks: the multilingual encoder we tested does not separate Bangla fact-check
+headlines well enough for reliable retrieval, as they share a fixed rhetorical
+template. Architecture-level alternatives to our data-centric mitigations, such
+as CLIPood \cite{clipood} and domain-specific prompt tuning \cite{dpod}, were
+not evaluated, and extending the pipeline to video would need a different
+approach.
+
+\section{Conclusion}
+
+We set out to build a detector for manipulated Bangla news imagery and found
+that the harder problem was establishing what any number measured on a
+constructed benchmark actually means.
+
+Three properties of BanFakeMM had to be dealt with before its results could be
+interpreted. Its manipulated images are separable from authentic ones by file
+metadata alone, at $100$ percent accuracy and without reading a pixel; we
+re-encode every image through one pipeline, which removes the artefact at a
+cost of $1.03$ accuracy points and establishes that the remaining signal is in
+the content. A weaker form of the same shortcut, $77$ to $83$ percent from
+metadata alone, appears in a second Bangla corpus, so it is not specific to this
+benchmark. Its five attack types do not pose one task: in three of them every
+manipulated image is byte-identical to an authentic one, so an image-only model
+is undecidable there, and we scope our claims to the two splits where the
+manipulation reaches the pixels. And its images recur---both as near-duplicates
+and as repeated source articles---so every partition is screened on content and
+the residual article-level overlap is measured rather than assumed away.
+
+Within that scope, the findings are these. Visual features carry the
+discriminative signal: CLIP alone reaches $95.38$ percent under duplicate-aware
+grouped cross-validation, $94.35$ with the artefact removed, while every
+text-only configuration saturates below $78$. OCR is near enough to chance to
+remove, and the caption-fusion pathway returns nothing measurable for its
+computational cost. Transfer to an unseen manipulation style costs roughly nine
+points of accuracy. Supervised adaptation on 300 target-style images recovers a
+substantial part of that, improving ranking by $+0.025$ AUROC with intervals
+excluding zero across eight seeds and both encodings.
+
+Two of these conclusions correct our own earlier published claims about this
+system: that the shift penalty was mostly a calibration effect, and that
+supervised adaptation added nothing. Both errors had the same cause---a
+measurement that was too small, too threshold-dependent, and taken on
+uncontrolled data---and both were invisible from inside the result that
+produced them. We report the corrections with the measurements that force them,
+because a field that cannot revise its own numbers in public accumulates them
+instead.
+
+The gap between a high same-distribution figure and reliable behaviour outside
+the training distribution is real. What this work adds is that a sizeable part
+of such a gap, and sometimes its entire apparent explanation, can be a property
+of the benchmark rather than of the model---and that distinguishing the two
+costs a hash, a re-encode, and the discipline to measure an effect with a
+statistic sensitive enough to find it.

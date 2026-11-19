@@ -1,0 +1,76 @@
+%==============================================================
+% DATASET ARTEFACT CONTROL -- drop-in block for the journal version.
+%
+% WHERE IT GOES: Section III-B, immediately after the "Near-duplicate
+% screening" subsubsection. The two sections belong together: both say what
+% is wrong with the data and what was done about it.
+%
+% ALSO ADD the two rows marked below to Table I so the numbers sit in the
+% same column as everything else.
+%
+% NUMBERS, all measured under the identical grouped protocol
+% (StratifiedGroupKFold over duplicate clusters, 2 repeats x 5 folds,
+% same hyperparameters) -- see artefact_control.csv:
+%                                     acc            P      R      F1
+%     metadata only, no pixels      100.00 +- 0.00  100.00 100.00 100.00
+%     CLIP only, re-encoded images   94.35 +- 0.94   94.17  94.60  94.37
+%     CLIP only, raw images (Tab. I) 95.38 +- 1.33   94.68  96.15  95.41
+% Normalisation recipe: scripts/normalize_images_confound_test.py
+%     384x384, RGB, JPEG quality 90, EXIF dropped.
+% Shortcut survey across splits: split_ceilings.csv / shortcut_check.py
+%==============================================================
+
+\subsubsection{Metadata artefact control}
+\label{sec:artefact}
+A second contamination is not about which images recur but about how they were
+produced. In the AdversarialEdit split every one of the 1{,}000 manipulated
+images is $1408 \times 768$, while the authentic images are spread over many
+resolutions, formats and colour modes; AdversarialGen carries the same
+signature in 995 of its 1{,}000 manipulated images. The classes are therefore
+separable without looking at a single pixel. We confirm this directly: a
+classifier given only width, height, area, aspect ratio, file size, format and
+colour mode---no image content whatsoever---reaches
+$100.00 \pm 0.00$ percent accuracy under the grouped protocol of
+Section~\ref{sec:training}. Any model with access to the file as stored can
+score perfectly here for the wrong reason, and a headline accuracy near
+95 percent means nothing until that is ruled out.
+
+We therefore re-encode every image through one identical pipeline before
+feature extraction: resized to $384 \times 384$, converted to RGB, saved as
+JPEG at quality 90, with EXIF discarded. Resolution, aspect ratio, format,
+colour mode and EXIF are destroyed; content is preserved. Repeating the
+CLIP-only configuration on the re-encoded corpus, with the same folds,
+hyperparameters and cut-off, gives $94.35 \pm 0.94$ percent against
+$95.38 \pm 1.33$ on the originals---a loss of $1.03$ points. The discriminative
+signal is in the pixels, not in the provenance fingerprint.
+
+Two limits on what this establishes. Re-encoding removes the \emph{storage}
+artefact, not a generation-pipeline signature that survives resampling: if
+every manipulated image carries the same synthesis fingerprint, a visual model
+may be recognising the generator rather than the manipulation, and the
+construction-by-pipeline labelling of Section~\ref{sec:data} makes that
+difficult to separate even in principle. And the distribution-shift evaluation
+of Section~\ref{sec:shift} is run on the original files, so its figures carry
+the uncontrolled artefact; re-running that protocol on re-encoded images is the
+control we have not done. We report the same-distribution number both ways and
+flag the shift number as uncontrolled rather than quietly reporting the larger
+of the two.
+
+%--------------------------------------------------------------
+% ADD THESE TWO ROWS TO TABLE I.
+%
+% In the "Text-only baselines" block, rename that block to "Reference
+% baselines" and add:
+%
+%   Metadata only (no pixels)\,$^{\ddagger}$ & 100.00 $\pm$ 0.00 & 100.00 & 100.00 & 100.00 \\
+%
+% In the "Modality ablation" block, directly under the "CLIP only" row:
+%
+%   \quad on artefact-controlled images & 94.35 $\pm$ 0.94 & 94.17 & 94.60 & 94.37 \\
+%
+% And extend the table footnote with:
+%
+%   $^{\ddagger}$ Width, height, area, aspect ratio, file size, format and
+%   colour mode only, with no image content; it separates the classes
+%   perfectly, which is why Section~\ref{sec:artefact} re-encodes every image.
+%--------------------------------------------------------------

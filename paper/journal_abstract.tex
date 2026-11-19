@@ -1,0 +1,49 @@
+%==============================================================
+% ABSTRACT + INDEX TERMS -- journal version.
+%
+% Every figure quoted here is traceable:
+%   100 percent metadata-only            artefact_control.csv
+%   1.03 point cost of re-encoding       95.38 - 94.35, same file
+%   1,000 of 1,000 byte-identical        split_ceilings.csv
+%   AUROC 0.4832 / 0.5165 / 0.5094       textsplit_proof.csv
+%   95.38 / 94.35, text-only below 78    ablation_grouped_summary.csv + above
+%   94.35 -> 84.9 under shift (9.45)     big_sealed_results_v2.csv
+%   n = 1,308 sealed                     big_sealed_results_v2.csv
+%   +0.0240 / +0.0273 AUROC, 8 seeds     adaptation_final.csv
+%==============================================================
+
+\begin{abstract}
+Fake news detection for low-resource languages such as Bangla depends on
+synthetically constructed benchmarks, and a constructed benchmark is assembled
+by a pipeline that leaves traces. This paper reports an image-level detector
+for manipulated Bangladeshi news imagery together with the controls needed to
+say what its numbers mean. Two properties of the BanFakeMM benchmark change the
+interpretation of any result obtained on it. First, file metadata
+alone---resolution, format and colour mode, with no pixel content---separates
+manipulated from authentic images at 100 percent accuracy; re-encoding every
+image through one identical pipeline removes the artefact at a cost of
+1.03 accuracy points, which establishes that the remaining signal lies in the
+content; a weaker version of the same shortcut (77 to 83 percent) appears in a
+second Bangla corpus. Second, the benchmark's five attack types do not pose a single task:
+in three of them every one of the 1,000 manipulated images is byte-identical to
+an authentic image, so an image-only model is undecidable there, and its
+measured AUROC on those splits is 0.48 to 0.52. We scope the evaluation to the
+two splits in which the manipulation reaches the pixels. Within that scope, a
+per-modality ablation under duplicate-aware grouped cross-validation shows CLIP
+visual features dominating at 95.38 percent---94.35 with the artefact
+removed---while every text-only configuration saturates below 78 percent; OCR
+and the caption-fusion pathway are removed on evidence rather than by
+assumption. Transfer to an unseen manipulation style costs roughly nine points
+of accuracy on a 1,308-image sealed partition, and supervised adaptation on
+300 target-style images improves ranking by 0.025 AUROC, with confidence
+intervals excluding zero across eight seeds and both encodings. Two conclusions
+we previously published about this system---that the shift penalty was largely
+a calibration effect, and that supervised adaptation added nothing---are
+corrected here, together with the measurements that force the correction.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Bangla fake news detection, multimodal misinformation, CLIP, distribution
+shift, dataset artefacts, shortcut learning, near-duplicate leakage,
+evaluation methodology, low-resource language processing
+\end{IEEEkeywords}

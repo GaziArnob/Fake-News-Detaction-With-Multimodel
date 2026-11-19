@@ -1,0 +1,22 @@
+====================================================================
+RETRIEVAL AGAINST GOLD DOCUMENTS
+====================================================================
+subset                    n     R@1     R@5    R@10     MRR
+all in-scope            120    0.8%    2.5%    5.0%   0.017
+  label=contradicted     90    0.0%    2.2%    5.6%   0.011
+  label=supported        30    3.3%    3.3%    3.3%   0.033
+  lang=bangla           120    0.8%    2.5%    5.0%   0.017
+
+====================================================================
+WHY: EMBEDDING SEPARABILITY ON THIS CORPUS
+====================================================================
+  Bangla titles    n=400   pairwise cosine of UNRELATED docs: median 0.856  p95 0.960  max 0.995
+  English titles   n=57    pairwise cosine of UNRELATED docs: median 0.268  p95 0.578  max 0.802
+
+  top-1 similarity, in-scope (Bangla) : 0.846
+  top-1 similarity, out-of-scope (En) : 0.188
+  mean gap between hit 1 and hit 2    : 0.0061
+
+  The store's configured min_score of 0.30 admits essentially every
+  Bangla document, so the top-5 is close to arbitrary among documents
+  sharing the corpus's fixed headline template.

@@ -1,0 +1,224 @@
+%==============================================================
+% INTRODUCTION + RELATED WORK -- journal version.
+%
+% Rewritten against the conference version because the contributions changed:
+% the benchmark decomposition and the artefact control are new, and two of the
+% conference version's own conclusions are corrected here.
+%
+% THREE NEW REFERENCES, each verified against a machine-readable record:
+%   shortcut     Geirhos et al., Nature Machine Intelligence 2020,
+%                doi:10.1038/s42256-020-00257-z  (arXiv:2004.07780)
+%   datasetbias  Torralba & Efros, CVPR 2011, pp. 1521-1528,
+%                doi:10.1109/CVPR.2011.5995347
+%   nadeau       Nadeau & Bengio, Machine Learning 52(3), 2003, pp. 239-281,
+%                doi:10.1023/A:1024068626366
+% Bibitems for all three are at the end of this file.
+%==============================================================
+
+\section{Introduction}
+
+Bangladesh's social media ecosystem has become a primary vector for manipulated
+news imagery, from digitally altered photocards and forged documents to
+AI-generated video frames misattributed to public figures. Unlike text-only
+misinformation, this content exploits the visual and textual channels jointly:
+a viral image is judged not on its pixels alone but on the claim attached to it
+as it spreads.
+
+The problem is compounded by linguistic specificity. Most fake-news detection
+methods are built on English datasets from Western platforms and presuppose
+signals---dense comment threads, public retweet graphs---that are sparse or
+structured differently in Bangladesh. No large-scale, organically collected
+corpus of manipulated Bangladeshi news images exists, so training must rely on
+synthetically constructed benchmarks.
+
+That reliance is the starting point of this paper. A constructed benchmark is
+reproducible, which is its virtue, but it is also assembled by a pipeline, and
+a pipeline leaves traces. Two consequences follow, and neither is checked as a
+matter of course. First, the classes may be separable for reasons that have
+nothing to do with the phenomenon under study: if the generator emits images at
+one resolution and the authentic images arrive at many, a model can score
+perfectly without looking at a picture---the shortcut-learning failure
+\cite{shortcut} in the form dataset-bias work has warned about for over a
+decade \cite{datasetbias}, and which audits of fake-news corpora have since
+found in practice \cite{verma}. Second, a benchmark that advertises several
+``attack types'' may not pose the same task in each of them: if an attack
+rewrites an article's text and reuses its photograph unchanged, then an
+image-only model is being asked a question whose answer is not present in its
+input, and whatever number it produces is not a measure of its competence. A
+related concern, unimodal bias, has been documented in English multimodal
+misinformation benchmarks \cite{verite}.
+
+We find both in BanFakeMM \cite{banfakemm}, the benchmark this work builds on,
+and both change what the surrounding results mean. This paper therefore reports
+a detector and, inseparably, the measurement discipline needed to say anything
+about it.
+
+Our contributions are as follows.
+
+\begin{itemize}
+\item \textbf{A decomposition of the benchmark by modality.} Of BanFakeMM's
+five adversarial splits, two manipulate the image and three manipulate the
+article text while reusing the photograph: in each of those three, every one
+of the 1{,}000 manipulated images is byte-identical to an authentic image from
+the benchmark's own corpus. An image-only detector is well posed on two splits
+and undecidable on three, and we show its measured behaviour matches that
+prediction to the decimal.
+
+\item \textbf{A dataset artefact, and a control that it survives.} In the
+training split every manipulated image shares one resolution, and a classifier
+given only file metadata---no pixels---separates the classes perfectly.
+Re-encoding every image through one identical pipeline removes the artefact and
+costs the visual model $1.03$ accuracy points, which establishes that the
+signal is in the content.
+
+\item \textbf{A per-modality ablation under duplicate-aware grouped
+cross-validation}, which removes OCR on evidence rather than by assumption and
+shows the caption-fusion pathway does not earn its computational cost, together
+with a like-for-like comparison against the feature families of the closest
+prior Bangla multimodal system under that same protocol.
+
+\item \textbf{A distribution-shift evaluation} on a 1{,}308-image sealed
+partition---$6.7\times$ the one used in earlier work on this system---with the
+artefact controlled, thresholds selected on a disjoint partition, and
+article-level overlap measured rather than assumed away.
+
+\item \textbf{Evidence that supervised adaptation helps}, and an account of why
+an earlier measurement said otherwise. Adaptation on 300 target-style images
+improves ranking by $+0.025$ AUROC with confidence intervals excluding zero
+across eight seeds, in both the controlled and uncontrolled settings. The
+earlier null rested on accuracy at a fixed threshold on 194 images from a
+single fit---a statistic we show can disagree in sign with the effect it is
+meant to measure.
+\end{itemize}
+
+Two of these findings correct conclusions we previously published about this
+same system. We state them as corrections, with the measurements that force
+them, rather than quietly revising the numbers.
+
+We claim no architectural novelty. BLIP/CLIP feature extraction with a
+gradient-boosted classifier is well established, and the accuracy it reaches
+here is unremarkable. What we have not found in the Bangla literature is an
+image-level manipulation detector whose reported numbers are accompanied by
+evidence that the benchmark supports them.
+
+\section{Related Work}
+
+\subsection{Bangla Fake News Detection}
+
+Research on Bangla-language fake news detection remains limited relative to
+English. BanFakeNews \cite{banfakenews} established an early large-scale
+benchmark of roughly 50{,}000 Bangla news items labeled authentic or
+fabricated, and BanFakeNews-2.0 \cite{banfakenews2} extended that line to a
+60{,}000-instance curated corpus with an LLM-based benchmark. Both are
+text-only. MultiBanFakeDetect \cite{multibanfake} moved to multimodal
+settings with a hybrid DenseNet-169/mBERT fusion architecture and is the
+closest prior system to the present work in both language and modality scope.
+Beyond Bangla specifically, MMCFND and its MMIFND dataset \cite{mmcfnd} extend
+caption-aware detection to seven low-resource Indic languages including
+Bengali.
+
+None of these is organised around a defined image-manipulation task with
+adversarially constructed positive examples: MultiBanFakeDetect labels whole
+articles by their overall claim, so a model may succeed on textual cues alone,
+and the remaining systems do not take images as a decision input at all. This
+is the gap BanFakeMM \cite{banfakemm} addresses and the one we work in---with
+the qualification, established in Section~\ref{sec:detectable}, that only part
+of that benchmark poses an image-level task.
+
+\subsection{Multimodal Misinformation Detection}
+
+Outside the Bangla literature, EANN \cite{eann}, MVAE \cite{mvae} and SpotFake
+\cite{spotfake} established that visual and textual signals are complementary
+for misinformation detection, each on English-language, Western-platform data.
+A more recent line pairs multimodal classification with retrieval-augmented,
+multi-model verification---DEFAME \cite{defame}, RAGAR \cite{ragar}, RAMA
+\cite{rama} and CaLM \cite{calm}---and reports gains from grounding a verdict
+in retrieved evidence rather than in the classifier alone. None is
+Bangla-specific or grounded in a Bangladeshi corpus. We do not evaluate a
+verification stage here; Section~\ref{sec:limitations} explains what
+evaluating one properly would require and why we judge our preliminary
+measurement insufficient to report.
+
+Work on adapting vision-language models under distribution shift is directly
+relevant to our shift results. CLIPood \cite{clipood} adapts CLIP itself for
+out-of-distribution generalization, and DPOD \cite{dpod} learns
+domain-specific prompts for multimodal misinformation detection using
+out-of-domain data. Both are architecture-level interventions; our shift
+mitigation is data-centric---threshold selection on a disjoint partition, and
+supervised adaptation on target-style examples---and we do not claim the two
+are exclusive.
+
+\subsection{Evaluation Integrity in Constructed Benchmarks}
+\label{sec:related-integrity}
+
+The concerns that organise this paper are not new to machine learning, only
+under-applied in this subfield. Torralba and Efros \cite{datasetbias} showed
+that visual datasets carry signatures strong enough for a classifier to name
+the dataset an image came from, and argued that benchmark performance can
+therefore measure dataset membership rather than the target concept. Geirhos
+et al.\ \cite{shortcut} generalised this as shortcut learning: networks
+reliably prefer any decision rule that separates the training classes, however
+incidental, and such rules are invisible to accuracy on an
+identically-constructed test set. The diagnostic they recommend---evaluate on
+data where the shortcut is absent---is what our normalisation control
+(Section~\ref{sec:normalise}) implements, and what our per-split decomposition
+(Section~\ref{sec:detectable}) does at the level of the task rather than the
+features.
+
+The same concerns have been raised inside misinformation detection, though not
+for Bangla and not for image benchmarks built this way. Verma \cite{verma}
+audits the ISOT fake-news corpus and finds that a classifier given only the
+subject field, with the article text removed, reaches an F1 of $1.000$ because
+the two classes have disjoint subjects; removing the identified leakage
+channels barely moves F1, but a topic-disjoint split lowers it substantially
+and on an independent benchmark all models fall to near-chance ranking. The
+paper recommends metadata-only and topic-disjoint baselines as cheap
+diagnostics, which is the diagnostic we apply to image files. For multimodal
+benchmarks, Papadopoulos et al.\ \cite{verite} showed that two widely used
+ones, VMU-Twitter and COSMOS, carry unimodal bias---a detector reading one
+modality can match or beat multimodal ones---and built VERITE so that each
+image and each caption occurs in both a truthful and a misleading pair; Lin et
+al.\ \cite{linmodality} propose automated analyses that quantify modality bias
+per sample. These approaches measure, through trained detectors, how much each
+modality contributes. Our per-split analysis is complementary: where an attack
+changes only the article text, the answer for an image-only model follows
+exactly from content hashes, with nothing trained.
+
+The statistical half of the problem is equally well established and equally
+often skipped. Nadeau and Bengio \cite{nadeau} showed that the folds of a
+resampled cross-validation are not independent, because their training sets
+overlap, and that the naive variance estimate is consequently too small; they
+give the correction we apply in Section~\ref{sec:training}. Our results include
+a concrete instance of the cost of ignoring this: a null result reported on a
+small test partition, at a single threshold, from a single fit, which a
+properly powered and threshold-free measurement reverses
+(Section~\ref{sec:adaptation}).
+
+To our knowledge no prior Bangla multimodal detection work reports a
+metadata-only control, a per-split analysis of which modality carries the
+manipulation, or a correction for fold dependence. The ideas are not new:
+metadata-only probes and unimodal-bias analysis exist for English text and
+social-media corpora \cite{verma,verite}. What we add is their application to a
+Bangla image-manipulation benchmark, and an exact test---byte-level reuse of
+the authentic image---for which attack types an image-only model can in
+principle detect. We take these to be the minimum reporting standard for
+results on constructed benchmarks of this kind, rather than contributions
+peculiar to this paper.
+
+%==============================================================
+% BIBITEMS for the three new references. Insert into the bibliography;
+% IEEE numbering follows order of first citation.
+%==============================================================
+%
+% \bibitem{shortcut} R. Geirhos, J.-H. Jacobsen, C. Michaelis, R. Zemel,
+% W. Brendel, M. Bethge, and F. A. Wichmann, ``Shortcut learning in deep neural
+% networks,'' \emph{Nature Machine Intelligence}, vol. 2, pp. 665--673, 2020,
+% doi: 10.1038/s42256-020-00257-z.
+%
+% \bibitem{datasetbias} A. Torralba and A. A. Efros, ``Unbiased look at dataset
+% bias,'' in \emph{Proc. IEEE Conf. Computer Vision and Pattern Recognition
+% (CVPR)}, 2011, pp. 1521--1528, doi: 10.1109/CVPR.2011.5995347.
+%
+% \bibitem{nadeau} C. Nadeau and Y. Bengio, ``Inference for the generalization
+% error,'' \emph{Machine Learning}, vol. 52, no. 3, pp. 239--281, 2003,
+% doi: 10.1023/A:1024068626366.

@@ -1,0 +1,7 @@
+mode,model,tau,n,acc,prec_f,rec_f,rec_r,ci_lo,ci_hi
+raw,zeroshot,0.09,1326,87.2,83.5,93.2,81.0,85.4,88.9
+raw,adapted,0.12,1326,88.6,83.4,96.9,80.0,86.9,90.3
+raw,adapted - zeroshot,,1326,1.4,,,,-0.1,2.9
+controlled,zeroshot,0.25,1326,85.0,87.0,83.0,87.1,83.0,86.9
+controlled,adapted,0.35,1326,88.8,89.4,88.6,89.1,87.2,90.6
+controlled,adapted - zeroshot,,1326,3.8,,,,2.3,5.4

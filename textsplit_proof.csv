@@ -1,0 +1,4 @@
+split,n,auroc,mean_prob_fakeclass,mean_prob_realclass,cross_label_pairs,max_abs_delta_prob
+LinguisticAttack,2000,0.4832,0.0703,0.079,26,0.0
+RandomSwap,2000,0.5165,0.0678,0.0616,38,0.0
+SemanticSwap,2000,0.5094,0.0808,0.0739,131,0.0

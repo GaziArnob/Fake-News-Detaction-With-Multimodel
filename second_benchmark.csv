@@ -1,0 +1,2 @@
+benchmark,n_images,n_manipulated,metadata_only_acc,metadata_only_acc_std,metadata_only_auroc,shared_hashes_across_labels
+MultiBanFakeDetect,9597,4797,77.51,4.55,0.8533,85

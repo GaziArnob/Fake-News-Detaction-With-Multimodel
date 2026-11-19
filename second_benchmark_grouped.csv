@@ -1,0 +1,4 @@
+setting,n,acc,acc_std,auroc
+"all images, ungrouped KFold",9600,82.77,0.66,0.9022
+"de-duplicated, conflicts removed",9021,83.12,0.54,0.9095
+Train->Test official,960,77.08,,0.8517

@@ -8,3 +8,14 @@ data/verified_feedback.csv
 data/verified_features.csv
 independent_test_results.csv
 models/easyocr/
+
+# release hygiene (local caches, bulky image copies, third-party template)
+_cache/
+images/
+images_normalized/
+tmp/
+.codex-tmp-annotation/
+paper/springer_tpl/
+paper/sn-jnl.cls
+paper/sn-*.bst
+*.log

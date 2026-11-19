@@ -1,0 +1,3 @@
+configuration,acc,std,prec_f,rec_f,f1_f
+Metadata only (no pixels),100.0,0.0,100.0,100.0,100.0
+"CLIP only, artefact-controlled images",94.35,0.94,94.17,94.6,94.37
